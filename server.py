@@ -25,7 +25,7 @@ def index():
     with open("index.html") as f:
         return replacePlaceholder(
             oldText=f.read(), 
-            placeholder="placeholder",
+            placeholder="count",
             newContent=f"Page Count: {str(getCurrentPageViewCount())}"
         )
 
@@ -35,6 +35,6 @@ def queriedPage(query):
     with open("index.html") as f:
         return replacePlaceholder(
             oldText=f.read(), 
-            placeholder="placeholder",
+            placeholder="count",
             newContent=f"Sitewide View Count: {str(getCurrentPageViewCount())}<br>Your Query: {query}"
         )
