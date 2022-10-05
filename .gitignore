@@ -128,4 +128,8 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+# Allow private files
 Private.*
+
+# Ignore IDEA extras
+.idea/
