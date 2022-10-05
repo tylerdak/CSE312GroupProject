@@ -23,7 +23,10 @@ def replacePlaceholder(oldText: str, placeholder: str, newContent: str):
 # you end up returning in this function (ideally a correct
 # page count)
 def getCurrentPageViewCount():
-    countdb = collection.find({})
+    return collection.find({})
+    
+def incrementPageViewCount():
+    countdb = getCurrentPageViewCount()
     counter = 0
     for result in countdb:
         counter = result["count"]
@@ -32,6 +35,7 @@ def getCurrentPageViewCount():
 
 @app.route("/")
 def index():
+    incrementPageViewCount()
     with open("index.html") as f:
         return replacePlaceholder(
             oldText=f.read(), 
