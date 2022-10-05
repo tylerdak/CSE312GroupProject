@@ -1,14 +1,15 @@
 from flask import Flask, request
-from numpy import place
-import pymongo
+# from numpy import place
+# import pymongo
 from pymongo import MongoClient
 import json
 
 app = Flask(__name__)
 
-client = MongoClient("mongodb+srv://cse312group:db@cluster0.u70wkht.mongodb.net/?retryWrites=true&w=majority")
+# client = MongoClient("mongodb+srv://cse312group:db@cluster0.u70wkht.mongodb.net/?retryWrites=true&w=majority")
+client = MongoClient("mongo")
 db = client["CSE312Group"]
-collection = db["count"]
+stats = db["stats"]
 
 def escape(htmlStr):
     return htmlStr.replace("&","&amp").replace("<","&lt").replace(">","&gt")
@@ -23,14 +24,11 @@ def replacePlaceholder(oldText: str, placeholder: str, newContent: str):
 # you end up returning in this function (ideally a correct
 # page count)
 def getCurrentPageViewCount():
-    return collection.find({})
+    return stats.find_one({"label":"viewCount"})['value']
     
 def incrementPageViewCount():
-    countdb = getCurrentPageViewCount()
-    counter = 0
-    for result in countdb:
-        counter = result["count"]
-    collection.update_one({}, {"$set": {"count": counter+1}})
+    counter = getCurrentPageViewCount()
+    stats.update_one({"label":"viewCount"}, {"$set": {"value": counter+1}})
     return counter+1
 
 @app.route("/")
@@ -55,4 +53,7 @@ def queriedPage(query):
 
 # Site visible on http://127.0.0.1:5000/
 if __name__ == "__main__":
-    app.run(debug=True)
+    countStat = {"label":"viewCount"}
+    countValue = {"value":0}
+    stats.update_one(countStat,{"$setOnInsert": countValue}, upsert=True)
+    app.run(host="0.0.0.0", port=8081, debug=True)
