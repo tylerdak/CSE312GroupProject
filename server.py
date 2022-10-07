@@ -3,6 +3,7 @@ from flask import Flask, request
 # import pymongo
 from pymongo import MongoClient
 import json
+from flask import Flask,redirect
 
 app = Flask(__name__)
 
@@ -50,6 +51,16 @@ def queriedPage(query):
             placeholder="count",
             newContent=f"Sitewide View Count: {str(getCurrentPageViewCount())}<br>Your Query: {query}"
         )
+
+
+# This function will redirect the page to the main page after submitting the form, otherwise it will give the error
+# "Method not allowed for requested URL"
+@app.route('/', methods=['POST'])
+def test():
+    if request.method =='POST':
+        return redirect("http://127.0.0.1:8081", code=302)
+    else:
+        return("Error")
 
 # Site visible on http://127.0.0.1:5000/
 if __name__ == "__main__":
