@@ -35,7 +35,6 @@ def incrementPageViewCount():
 
 @app.route("/")
 def index():
-    print(client.list_database_names())
     incrementPageViewCount()
     with open("index.html") as f:
         return replacePlaceholder(
