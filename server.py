@@ -1,9 +1,10 @@
+import flask
 from flask import Flask, request
 # from numpy import place
 # import pymongo
 from pymongo import MongoClient
 import json
-from flask import Flask,redirect
+from flask import Flask, redirect
 
 app = Flask(__name__)
 
@@ -13,8 +14,10 @@ db = client["CSE312Group"]
 stats = db["stats"]
 users = db["users"]
 
+
 def escape(htmlStr):
-    return htmlStr.replace("&","&amp").replace("<","&lt").replace(">","&gt")
+    return htmlStr.replace("&", "&amp").replace("<", "&lt").replace(">", "&gt")
+
 
 def replacePlaceholder(oldText: str, placeholder: str, newContent: str):
     return oldText.replace("{{" + placeholder + "}}", newContent)
@@ -26,29 +29,35 @@ def replacePlaceholder(oldText: str, placeholder: str, newContent: str):
 # you end up returning in this function (ideally a correct
 # page count)
 def getCurrentPageViewCount():
-    return stats.find_one({"label":"viewCount"})['value']
-    
+    return stats.find_one({"label": "viewCount"})['value']
+
+
 def incrementPageViewCount():
     counter = getCurrentPageViewCount()
-    stats.update_one({"label":"viewCount"}, {"$set": {"value": counter+1}})
-    return counter+1
+    stats.update_one({"label": "viewCount"}, {"$set": {"value": counter + 1}})
+    return counter + 1
+
 
 @app.route("/")
 def index():
+    all_users = list(users.find({}, {'_id': 0}))
+    all_users_list = []
+    for x in all_users:
+        all_users_list.insert(0, x)
+
     incrementPageViewCount()
-    with open("index.html") as f:
-        return replacePlaceholder(
-            oldText=f.read(), 
-            placeholder="count",
-            newContent=f"Page Count: {str(getCurrentPageViewCount())}"
-        )
+    return flask.render_template("index.html",
+                                 count=f"Page Count: {str(getCurrentPageViewCount())}",
+                                 users=all_users_list
+                                 )
+
 
 @app.route("/<string:query>")
 def queriedPage(query):
     query = escape(query)
-    with open("index.html") as f:
+    with open("templates/index.html") as f:
         return replacePlaceholder(
-            oldText=f.read(), 
+            oldText=f.read(),
             placeholder="count",
             newContent=f"Sitewide View Count: {str(getCurrentPageViewCount())}<br>Your Query: {query}"
         )
@@ -57,18 +66,19 @@ def queriedPage(query):
 # This function will redirect the page to the main page after submitting the form, otherwise it will give the error
 # "Method not allowed for requested URL"
 @app.route('/', methods=['POST'])
-def test():
-    if request.method =='POST':
+def insert_display():
+    if request.method == 'POST':
         email = request.form['Email']
         password = request.form['psw']
         users.insert_one({"email": email, "password": password})
         return redirect("http://127.0.0.1:8081", code=302)
     else:
-        return("Error")
+        return "Error"
+
 
 # Site visible on http://127.0.0.1:5000/
 if __name__ == "__main__":
-    countStat = {"label":"viewCount"}
-    countValue = {"value":0}
-    stats.update_one(countStat,{"$setOnInsert": countValue}, upsert=True)
+    countStat = {"label": "viewCount"}
+    countValue = {"value": 0}
+    stats.update_one(countStat, {"$setOnInsert": countValue}, upsert=True)
     app.run(host="0.0.0.0", port=8081, debug=True)
