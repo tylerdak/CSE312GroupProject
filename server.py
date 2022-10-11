@@ -11,6 +11,7 @@ app = Flask(__name__)
 client = MongoClient("mongo")
 db = client["CSE312Group"]
 stats = db["stats"]
+users = db["users"]
 
 def escape(htmlStr):
     return htmlStr.replace("&","&amp").replace("<","&lt").replace(">","&gt")
@@ -34,6 +35,7 @@ def incrementPageViewCount():
 
 @app.route("/")
 def index():
+    print(client.list_database_names())
     incrementPageViewCount()
     with open("index.html") as f:
         return replacePlaceholder(
@@ -58,6 +60,9 @@ def queriedPage(query):
 @app.route('/', methods=['POST'])
 def test():
     if request.method =='POST':
+        email = request.form['Email']
+        password = request.form['psw']
+        users.insert_one({"email": email, "password": password})
         return redirect("http://127.0.0.1:8081", code=302)
     else:
         return("Error")
