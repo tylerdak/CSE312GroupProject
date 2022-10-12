@@ -1,10 +1,9 @@
 import flask
-from flask import Flask, request
+from flask import Flask, request, redirect
+from pymongo import MongoClient
+# import json
 # from numpy import place
 # import pymongo
-from pymongo import MongoClient
-import json
-from flask import Flask, redirect
 
 app = Flask(__name__)
 
