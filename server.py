@@ -40,10 +40,11 @@ def incrementPageViewCount():
 
 @app.route("/")
 def index():
-    all_users = list(users.find({}, {'_id': 0}))
+    all_users = list(users.find({}, {'email': 1, '_id': 0}))
     all_users_list = []
     for x in all_users:
-        all_users_list.insert(0, x)
+        email_insert = "Email: ", x.get("email")
+        all_users_list.insert(0, email_insert)
 
     incrementPageViewCount()
     return flask.render_template("index.html",
