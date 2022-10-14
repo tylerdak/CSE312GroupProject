@@ -55,6 +55,17 @@ def index():
                                  )
 
 
+@app.route("/<string:query>")
+def queriedPage(query):
+    query = escape(query)
+    with open("templates/index.html") as f:
+        return replacePlaceholder(
+            oldText=f.read(),
+            placeholder="count",
+            newContent=f"Sitewide View Count: {str(getCurrentPageViewCount())}<br>Your Query: {query}"
+        )
+
+
 @app.route("/login")
 def login():
     return flask.render_template("Login.html")
