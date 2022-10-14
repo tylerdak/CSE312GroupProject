@@ -4,6 +4,9 @@ import flask
 from flask import Flask, request, redirect
 from pymongo import MongoClient
 
+# Custom Password Manager Class
+from crypt import PassMan
+
 # import json
 # from numpy import place
 # import pymongo
@@ -66,7 +69,7 @@ def queriedPage(query):
         )
 
 
-@app.route("/login")
+@app.route("/login", methods=['GET'])
 def login():
     return flask.render_template("Login.html")
 
@@ -78,8 +81,8 @@ def insert_display_index():
     if request.method == 'POST':
         email = request.form['Email']
         password = request.form['psw']
-        users.insert_one({"email": email, "password": password})
-        return redirect("http://127.0.0.1:8081", code=302)
+        users.insert_one({"email": email, "password": PassMan.hash(password.encode())})
+        return redirect("/", code=302)
     else:
         return "Error"
 
@@ -87,14 +90,31 @@ def insert_display_index():
 @app.route('/login', methods=['POST'])
 def insert_display_login():
     if request.method == 'POST':
-        return redirect("http://127.0.0.1:8081/login", code=302)
+        # previous method, relies on the address being 127.0.0.1
+        # would require us to change it everywhere
+        # return redirect("http://127.0.0.1:8081/login", code=302)
+        email = request.form['Email']
+        password = request.form['psw']
+
+        proposedUser = users.find_one({"email":email})
+        if proposedUser == None:
+            print("User does not exist")
+        else:
+            hash = proposedUser["password"]
+            result = PassMan.check(password.encode(), hash)
+
+            # do whatever you want based on whether they submitted the correct password or not
+            print(result)
+
+        return redirect("/login", code=302)
     else:
         return "Error"
 
 
-# Site visible on http://127.0.0.1:5000/
+# Site visible on http://127.0.0.1:8081/
 if __name__ == "__main__":
     countStat = {"label": "viewCount"}
     countValue = {"value": 0}
     stats.update_one(countStat, {"$setOnInsert": countValue}, upsert=True)
+
     app.run(host="0.0.0.0", port=8081, debug=True)

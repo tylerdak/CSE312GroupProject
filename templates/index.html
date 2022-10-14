@@ -13,20 +13,17 @@
     <p>{{users}}</p>
     <h3>Create Account</h3>
 
+    <form action="/" id="users-form" method="post" enctype="multipart/form-data">
+      Email:<br>
+      <label for="form-Email"></label>
+      <input id="form-Email" type="email" name="Email">
+      <br>
+      Password:<br>
+      <label for="form-password"></label>
+      <input id="form-password" type="password" name="psw">
+      <input type="submit" value="Register">
+    </form>
+
+    <a href = "/login">Sign in here</a><br>
   </body>
-
-<form action="/" id="users-form" method="post" enctype="multipart/form-data">
-  Email:<br>
-  <label for="form-Email"></label>
-  <input id="form-Email" type="email" name="Email">
-  <br>
-  Password:<br>
-  <label for="form-password"></label>
-  <input id="form-password" type="password" name="psw">
-  <input type="submit" value="Register">
-</form>
-
-<a href = "/login">Sign in here</a><br>
-
-
 </html>
