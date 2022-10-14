@@ -1,4 +1,5 @@
 flask
 pymongo
 bcrypt
+bs4
 # dnspython

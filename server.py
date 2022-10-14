@@ -7,6 +7,8 @@ from pymongo import MongoClient
 # Custom Password Manager Class
 from crypt import PassMan
 
+from templating import Templating
+
 # import json
 # from numpy import place
 # import pymongo
@@ -71,44 +73,35 @@ def queriedPage(query):
 
 @app.route("/login", methods=['GET'])
 def login():
-    return flask.render_template("Login.html")
+    return Templating.injectHTMLBody(srcFile="templates/Login.html")
 
 
 # This function will redirect the page to the main page after submitting the form, otherwise it will give the error
 # "Method not allowed for requested URL"
 @app.route('/', methods=['POST'])
 def insert_display_index():
-    if request.method == 'POST':
-        email = request.form['Email']
-        password = request.form['psw']
-        users.insert_one({"email": email, "password": PassMan.hash(password.encode())})
-        return redirect("/", code=302)
-    else:
-        return "Error"
+    email = request.form['Email']
+    password = request.form['psw']
+    users.insert_one({"email": email, "password": PassMan.hash(password.encode())})
+    return redirect("/", code=302)
 
 
 @app.route('/login', methods=['POST'])
 def insert_display_login():
-    if request.method == 'POST':
-        # previous method, relies on the address being 127.0.0.1
-        # would require us to change it everywhere
-        # return redirect("http://127.0.0.1:8081/login", code=302)
-        email = request.form['Email']
-        password = request.form['psw']
+    email = request.form['Email']
+    password = request.form['psw']
 
-        proposedUser = users.find_one({"email":email})
-        if proposedUser == None:
-            print("User does not exist")
-        else:
-            hash = proposedUser["password"]
-            result = PassMan.check(password.encode(), hash)
-
-            # do whatever you want based on whether they submitted the correct password or not
-            print(result)
-
-        return redirect("/login", code=302)
+    proposedUser = users.find_one({"email":email})
+    if proposedUser is None:
+        print("User does not exist")
     else:
-        return "Error"
+        hashedPassword = proposedUser["password"]
+        result = PassMan.check(password.encode(), hashedPassword)
+
+        # do whatever you want based on whether they submitted the correct password or not
+        print(result)
+
+    return redirect("/login", code=302)
 
 
 # Site visible on http://127.0.0.1:8081/
