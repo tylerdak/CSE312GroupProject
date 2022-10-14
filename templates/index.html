@@ -4,13 +4,15 @@
     <meta charset="utf-8" />
     <meta name="viewport" />
 
-    <title>Hello World!</title>
+    <title>Register</title>
   </head>
   <body>
     <h1>Page View Counter</h1>
     <p>{{count}}</p>
     <h2>All users</h2>
     <p>{{users}}</p>
+    <h3>Create Account</h3>
+
   </body>
 
 <form action="/" id="users-form" method="post" enctype="multipart/form-data">
@@ -21,7 +23,10 @@
   Password:<br>
   <label for="form-password"></label>
   <input id="form-password" type="password" name="psw">
-  <input type="submit" value="Post">
+  <input type="submit" value="Register">
 </form>
+
+<a href = "/login">Sign in here</a><br>
+
 
 </html>

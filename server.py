@@ -1,6 +1,9 @@
+from __future__ import print_function
+import sys
 import flask
 from flask import Flask, request, redirect
 from pymongo import MongoClient
+
 # import json
 # from numpy import place
 # import pymongo
@@ -52,26 +55,28 @@ def index():
                                  )
 
 
-@app.route("/<string:query>")
-def queriedPage(query):
-    query = escape(query)
-    with open("templates/index.html") as f:
-        return replacePlaceholder(
-            oldText=f.read(),
-            placeholder="count",
-            newContent=f"Sitewide View Count: {str(getCurrentPageViewCount())}<br>Your Query: {query}"
-        )
+@app.route("/login")
+def login():
+    return flask.render_template("Login.html")
 
 
 # This function will redirect the page to the main page after submitting the form, otherwise it will give the error
 # "Method not allowed for requested URL"
 @app.route('/', methods=['POST'])
-def insert_display():
+def insert_display_index():
     if request.method == 'POST':
         email = request.form['Email']
         password = request.form['psw']
         users.insert_one({"email": email, "password": password})
         return redirect("http://127.0.0.1:8081", code=302)
+    else:
+        return "Error"
+
+
+@app.route('/login', methods=['POST'])
+def insert_display_login():
+    if request.method == 'POST':
+        return redirect("http://127.0.0.1:8081/login", code=302)
     else:
         return "Error"
 
