@@ -47,33 +47,34 @@ def incrementPageViewCount():
 
 @app.route("/")
 def index():
-    all_users = list(users.find({}, {'email': 1, '_id': 0}))
-    all_users_list = []
-    for x in all_users:
-        email_insert = "Email: ", x.get("email")
-        all_users_list.insert(0, email_insert)
+    # may want later
+    #
+    # all_users = list(users.find({}, {'email': 1, '_id': 0}))
+    # all_users_list = []
+    # for x in all_users:
+    #     email_insert = "Email: ", x.get("email")
+    #     all_users_list.insert(0, email_insert)
 
-    incrementPageViewCount()
-    return flask.render_template("index.html",
-                                 count=f"Page Count: {str(getCurrentPageViewCount())}",
-                                 users=all_users_list
-                                 )
+    return Templating.injectHTMLBody(None, srcFile="templates/index.html")
+
+@app.route("/registerLoginStyles.css")
+def retrieveRegisterLoginStyles():
+    return open('./templates/registerLoginStyles.css', 'rb').read(), 200, {'Content-Type': 'text/css'}
 
 
-@app.route("/<string:query>")
-def queriedPage(query):
-    query = escape(query)
-    with open("templates/index.html") as f:
-        return replacePlaceholder(
-            oldText=f.read(),
-            placeholder="count",
-            newContent=f"Sitewide View Count: {str(getCurrentPageViewCount())}<br>Your Query: {query}"
-        )
 
 
 @app.route("/login", methods=['GET'])
 def login():
-    return Templating.injectHTMLBody(srcFile="templates/Login.html")
+    renderedLogin = Templating.injectHTMLBody(srcFile="templates/Login.html")
+    # replace {{data}} here if desired
+    return renderedLogin
+
+@app.route("/getstarted", methods=['GET'])
+def getStarted():
+    renderedLogin = Templating.injectHTMLBody(srcFile="templates/JoinCreate/joincreate.html")
+
+    return renderedLogin
 
 
 # This function will redirect the page to the main page after submitting the form, otherwise it will give the error
@@ -108,6 +109,26 @@ def insert_display_login():
 def getCoverImage():
     return open('./templates/Login/Cover.png', 'rb').read()
 
+# Styles retrieval
+@app.route("/styles/<stylesheet>")
+def styleRetrieval(stylesheet):
+    match stylesheet:
+        case "master":
+            content = open('./templates/master.css')
+        case "getstarted":
+            content = open('./templates/JoinCreate/joincreate.css', 'rb').read()
+        case "modal":
+            content = open('./templates/modal.css', 'rb').read()
+
+    return content, 200, {'Content-Type': 'text/css'}
+
+# Script retrieval
+@app.route("/scripts/<scriptname>")
+def scriptRetrieval(scriptname):
+    match scriptname:
+        case "getstarted":
+            content = open('./templates/JoinCreate/joincreate.js','rb').read()
+    return content, 200, {'Content-Type':'text/js'}
 
 # Site visible on http://127.0.0.1:8081/
 if __name__ == "__main__":

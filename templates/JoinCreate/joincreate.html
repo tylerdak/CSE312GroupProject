@@ -1,0 +1,64 @@
+<body>
+	<link rel="stylesheet" href="/styles/getstarted" />
+	
+	<!-- Modal -->
+	<!-- src=https://www.w3schools.com/howto/howto_css_modals.asp -->
+
+	<div id="joinModal" class="modal">
+		<link rel="stylesheet" href="/styles/modal" />
+		<div id="joinModalContent" class="modal-content">
+		  <span id="joinModalClose", class="close">&times;</span>
+		  <form 
+		  	action="/getstarted/join/submit"
+          	id="joinModalForm"
+          	method="post"
+          	enctype="multipart/form-data"
+          >
+		  <div class="input-container joinCode">
+            <label for="joinCodeForm">Join Code:</label>
+            <input
+              id="joinCodeForm"
+              type="text"
+              name="Join Code"
+              placeholder="WRK247"
+            />
+          </div>
+		  <input class="submissionButton" type="submit" value="Join" />
+		  </form>
+		</div>
+	</div>
+
+	<div id="createModal" class="modal">
+		<link rel="stylesheet" href="/styles/modal" />
+		<div id="createModalContent" class="modal-content">
+		  <span id="createModalClose", class="close">&times;</span>
+		  <form 
+		  	action="/getstarted/create/submit"
+          	id="createModalForm"
+          	method="post"
+          	enctype="multipart/form-data"
+          >
+		  <div class="input-container createRoomName">
+            <label for="createRoomNameForm">Workplace Name:</label>
+            <input
+              id="createRoomNameForm"
+              type="text"
+              name="Workplace Name"
+              placeholder="My Workplace"
+            />
+          </div>
+		  <input class="submissionButton" type="submit" value="Create" />
+		  </form>
+		</div>
+	</div>
+
+	<div class="split-screen">
+		<div class="left">
+		  	<h2 id="joinButton">Join</h2>
+		</div>
+		<div class="right">
+			<h2 id="createButton">Create</h2>
+		</div>
+
+	<script src="/scripts/getstarted"></script>
+</body>

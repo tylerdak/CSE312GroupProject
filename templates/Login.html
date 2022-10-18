@@ -16,114 +16,7 @@
       href="https://fonts.googleapis.com/css2?family=Abhaya+Libre:wght@400;500;600;700;800&family=Raleway:ital,wght@0,100;0,200;0,300;1,100;1,200;1,300&display=swap"
       rel="stylesheet"
     />
-    <style>
-      :root {
-        font-size: 100%;
-        font-size: 16px;
-        line-height: 1.5;
-        --primary-blue: #233975;
-      }
-      body {
-        padding: 0;
-        margin: 0;
-      }
-      h2 {
-        font-size: 3rem;
-        font-weight: 700;
-        font-family: "Abhaya Libre", serif;
-        text-align: left;
-      }
-      a {
-        text-decoration: none;
-        color: var(--primary-blue);
-      }
-      a:hover {
-        text-decoration: underline;
-      }
-      /* .small{
-          font-size: 80%;
-          text-align: center;
-      } */
-      .split-screen {
-        display: flex;
-        flex-direction: column;
-      }
-      .left {
-        height: 800px;
-      }
-      .left,
-      .right {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-      }
-
-      .right .copy {
-        color: black;
-        text-align: center;
-      }
-      .right .copy p {
-        margin: 1.5rem 0;
-        font-size: 0.875rem;
-      }
-      .right form {
-        width: 328px;
-      }
-      form input[type="email"],
-      form input[type="password"] {
-        display: block;
-        width: 100%;
-        box-sizing: border-box;
-        border-radius: 8px;
-        border: 1px solid #c4c4c4;
-        padding: 1em;
-        margin-bottom: 1.25rem;
-        font-size: 0.875rem;
-      }
-      label {
-        display: block;
-        margin-bottom: 0.5rem;
-        font-family: "Raleway", sans-serif;
-        font-style: normal;
-        font-weight: 600;
-        /* font-size: 0.75rem; */
-      }
-      p {
-        color: rgba(43, 43, 43, 0.5);
-        font-family: "Raleway";
-        font-style: normal;
-        text-align: left;
-      }
-
-      .login-btn {
-        display: block;
-        width: 100%;
-        background: linear-gradient(270deg, #f48088 0%, #a65bfa 101.71%);
-        color: white;
-        font-weight: 700;
-        border: none;
-        padding: 1rem;
-        border-radius: 0.75rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-      }
-      .login-btn:hover {
-        background: black;
-        cursor: pointer;
-      }
-      @media screen and (min-width: 900px) {
-        .split-screen {
-          flex-direction: row;
-          height: 100vh;
-        }
-        .left,
-        .right {
-          display: flex;
-          width: 50%;
-          height: auto;
-        }
-      }
-    </style>
+    <link rel="stylesheet" href="/registerLoginStyles.css" />
     <div class="split-screen">
       <div class="left">
         <section class="copy">
@@ -139,8 +32,9 @@
           enctype="multipart/form-data"
         >
           <section class="copy">
-            {{data}}
-            <h2>Welcome Back</h2>
+            <!-- Not using this yet -->
+            <!-- {{data}} -->
+            <h2>Welcome Back</h2> 
             <p class="small">Answer to the following questions to login.</p>
           </section>
           <div class="input-container name">
@@ -164,10 +58,10 @@
             />
             <!-- <i class="fa fa-eye-slash"></i> -->
           </div>
-          <input class="login-btn" type="submit" value="Login" />
+          <input class="register-btn" type="submit" value="Login" />
 
           <p>
-            Don’t have an account ?<a href="/"><b>Sign up here</b></a>
+            Don’t have an account?<a href="/"><b>Sign up here</b></a>
           </p>
         </form>
       </div>
