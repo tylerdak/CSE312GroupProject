@@ -103,6 +103,11 @@ def insert_display_login():
 
     return redirect("/login", code=302)
 
+# This function will add cover image  in login and register pages
+@app.route('/Login/Cover.png', methods=['GET'])
+def getCoverImage():
+    return open('./templates/Login/Cover.png', 'rb').read()
+
 
 # Site visible on http://127.0.0.1:8081/
 if __name__ == "__main__":
