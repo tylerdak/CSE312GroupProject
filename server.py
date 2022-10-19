@@ -98,11 +98,14 @@ def insert_display_login():
     else:
         hashedPassword = proposedUser["password"]
         result = PassMan.check(password.encode(), hashedPassword)
+        if result is True:
+            return redirect("/getstarted", code=302)
 
         # do whatever you want based on whether they submitted the correct password or not
         print(result)
 
     return redirect("/login", code=302)
+
 
 # This function will add cover image  in login and register pages
 @app.route('/Login/Cover.png', methods=['GET'])
