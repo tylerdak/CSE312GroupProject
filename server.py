@@ -65,12 +65,16 @@ def retrieveRegisterLoginStyles():
 
 
 
+def createLoginPage(isLoggedIn: bool):
+    renderedLogin = Templating.injectHTMLBody(srcFile="templates/Login.html")
+    jsInjectableJSON = f"\"{'{'}\\\"isLoggedIn\\\":{'true' if isLoggedIn else 'false'}{'}'}\""
+    renderedLogin = Templating.replacePlaceholder(oldText=renderedLogin, placeholder="data",newContent=jsInjectableJSON)
+    return renderedLogin
 
 @app.route("/login", methods=['GET'])
+# this assumes the user is not loggged in
 def login():
-    renderedLogin = Templating.injectHTMLBody(srcFile="templates/Login.html")
-    renderedLogin = Templating.replacePlaceholder(oldText=renderedLogin, placeholder="data",newContent=f"\"{\\\"isLoggedIn\\\": }\"")
-    return renderedLogin
+    return createLoginPage(isLoggedIn=False)
 
 @app.route("/workplace/<name>", methods=['GET'])
 def open_workplace(name):
@@ -132,13 +136,13 @@ def insert_display_login():
     else:
         hashedPassword = proposedUser["password"]
         result = PassMan.check(password.encode(), hashedPassword)
+        # if password is correct, tell JS to send the user to the /getstarted
+        # and store the cookie
         if result is True:
-            return redirect("/getstarted", code=302)
+            return createLoginPage(isLoggedIn=result)
 
-        # do whatever you want based on whether they submitted the correct password or not
-        print(result)
-
-    return redirect("/login", code=302)
+    # otherwise, fall through to the normal login html
+    return createLoginPage(isLoggedIn=False)
 
 
 # This function will add cover image  in login and register pages

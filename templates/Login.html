@@ -23,12 +23,12 @@
       const isLoggedIn = jsonData.isLoggedIn;
       
       if (isLoggedIn) {
-        const userID = jsonData.userID;
-        document.cookie = "userID=" + userID;
+        const userID = jsonData.isLoggedIn;
+        document.cookie = "userID=" + userID + ";path=/";
         window.location.replace("/getstarted");
       }
       else{
-        alert("false");
+        document.cookie = "userID=;expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
       }
     </script>
 
