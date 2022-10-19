@@ -1,9 +1,10 @@
 from __future__ import print_function
 import sys
 import flask
-from flask import Flask, request, redirect
+from flask import Flask, request, redirect, url_for, render_template
 from pymongo import MongoClient
-
+import random
+import string
 # Custom Password Manager Class
 from crypt import PassMan
 
@@ -20,6 +21,7 @@ client = MongoClient("mongo")
 db = client["CSE312Group"]
 stats = db["stats"]
 users = db["users"]
+workplaces = db["workplaces"]
 
 
 def escape(htmlStr):
@@ -70,12 +72,44 @@ def login():
     # replace {{data}} here if desired
     return renderedLogin
 
+@app.route("/workplace/<name>", methods=['GET'])
+def open_workplace(name):
+    workplace = workplaces.find({"workplace": name})
+    for each in workplace:
+        code = each.get("code")
+    return render_template('Workplace/workplace.html', name=name, code=code)
+
 @app.route("/getstarted", methods=['GET'])
 def getStarted():
     renderedLogin = Templating.injectHTMLBody(srcFile="templates/JoinCreate/joincreate.html")
 
     return renderedLogin
 
+@app.route("/getstarted/create/submit", methods=['POST'])
+def create_workplace():
+    workplaceName = request.form['Workplace Name']
+    
+    if workplaces.find_one({"workplace": workplaceName}) != None:
+        return redirect("/getstarted", code=403)
+    
+    joinCode = ''.join(random.choices(string.ascii_uppercase +
+                             string.digits, k=20))
+    workplaces.insert_one({"workplace": workplaceName, "code": joinCode})
+    return redirect(url_for('open_workplace', name=workplaceName))
+
+@app.route("/getstarted/join/submit", methods=['POST'])
+def join_workplace():
+    joinCode = request.form['Join Code']
+    
+    workplace = workplaces.find_one({"code": joinCode})
+    if workplace == None:
+        return redirect("/getstarted", code=403)
+
+    workplace2 = workplaces.find({"code": joinCode})
+    workplaceName = ""
+    for each in workplace2:
+        workplaceName = each.get("workplace")
+    return redirect(url_for('open_workplace', name=workplaceName))
 
 # This function will redirect the page to the main page after submitting the form, otherwise it will give the error
 # "Method not allowed for requested URL"
