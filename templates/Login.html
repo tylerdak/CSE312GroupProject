@@ -17,6 +17,21 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="/registerLoginStyles.css" />
+    <script>
+      var passedData = {{data}};
+      const jsonData = JSON.parse(passedData);
+      const isLoggedIn = jsonData.isLoggedIn;
+      
+      if (isLoggedIn) {
+        const userID = jsonData.userID;
+        document.cookie = "userID=" + userID;
+        window.location.replace("/getstarted");
+      }
+      else{
+        alert("false");
+      }
+    </script>
+
     <div class="split-screen">
       <div class="left">
         <section class="copy">
@@ -32,8 +47,6 @@
           enctype="multipart/form-data"
         >
           <section class="copy">
-            <!-- Not using this yet -->
-            <!-- {{data}} -->
             <h2>Welcome Back</h2> 
             <p class="small">Answer to the following questions to login.</p>
           </section>

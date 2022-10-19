@@ -69,7 +69,7 @@ def retrieveRegisterLoginStyles():
 @app.route("/login", methods=['GET'])
 def login():
     renderedLogin = Templating.injectHTMLBody(srcFile="templates/Login.html")
-    # replace {{data}} here if desired
+    renderedLogin = Templating.replacePlaceholder(oldText=renderedLogin, placeholder="data",newContent=f"\"{\\\"isLoggedIn\\\": }\"")
     return renderedLogin
 
 @app.route("/workplace/<name>", methods=['GET'])
