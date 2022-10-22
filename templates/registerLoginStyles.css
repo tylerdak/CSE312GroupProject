@@ -50,7 +50,7 @@
   .right form {
 	width: 328px;
   }
-  form input[type="email"],
+  form input[type="text"],
   form input[type="password"] {
 	display: block;
 	width: 100%;

@@ -9,6 +9,7 @@ import string
 from crypt import PassMan
 
 from templating import Templating
+import verify
 
 # import json
 # from numpy import place
@@ -115,22 +116,32 @@ def join_workplace():
         workplaceName = each.get("workplace")
     return redirect(url_for('open_workplace', name=workplaceName))
 
-# This function will redirect the page to the main page after submitting the form, otherwise it will give the error
-# "Method not allowed for requested URL"
+
 @app.route('/', methods=['POST'])
 def insert_display_index():
-    email = request.form['Email']
+    username = request.form['username']
     password = request.form['psw']
-    users.insert_one({"email": email, "password": PassMan.hash(password.encode())})
+    password_result = verify.validate.verify_password(password)      # return True or False
+    username_result = verify.validate.verify_username(username)
+    if password_result:
+        if username_result:
+            users.insert_one({"username": username, "password": PassMan.hash(password.encode())})
+            print("Your account has been created successfully")
+            return redirect("/login", code=302)
+        else:
+            print("Please edit the username")
+    else:
+        print("Please edit the password")
+
     return redirect("/", code=302)
 
 
 @app.route('/login', methods=['POST'])
 def insert_display_login():
-    email = request.form['Email']
+    username = request.form['username']
     password = request.form['psw']
 
-    proposedUser = users.find_one({"email":email})
+    proposedUser = users.find_one({"username":username})
     if proposedUser is None:
         print("User does not exist")
     else:
