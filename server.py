@@ -182,6 +182,15 @@ def scriptRetrieval(scriptname):
             content = open('./templates/JoinCreate/joincreate.js','rb').read()
     return content, 200, {'Content-Type':'text/js'}
 
+@app.route("/profile", methods=['GET'])
+def showProfile():
+    # Need change: hardcode username, listNameCreate, ListNameJoin
+    return render_template('/Profile/profile.html', username="{{Username}}", listNameCreate="{{Test}}", ListNameJoin="{{Test}}")
+
+@app.route("/profile.css", methods=['GET'])
+def profileCSS():
+    return open('./templates/Profile/profile.css', 'rb').read(), 200, {'Content-Type': 'text/css'}
+
 # Site visible on http://127.0.0.1:8081/
 if __name__ == "__main__":
     countStat = {"label": "viewCount"}

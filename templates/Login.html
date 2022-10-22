@@ -21,14 +21,14 @@
       var passedData = {{data}};
       const jsonData = JSON.parse(passedData);
       const isLoggedIn = jsonData.isLoggedIn;
-      
+
       if (isLoggedIn) {
         const userID = jsonData.isLoggedIn;
         document.cookie = "userID=" + userID + ";path=/";
         window.location.replace("/getstarted");
-      }
-      else{
-        document.cookie = "userID=;expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
+      } else {
+        document.cookie =
+          "userID=;expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
       }
     </script>
 
@@ -47,7 +47,7 @@
           enctype="multipart/form-data"
         >
           <section class="copy">
-            <h2>Welcome Back</h2> 
+            <h2>Welcome Back</h2>
             <p class="small">Answer to the following questions to login.</p>
           </section>
           <div class="input-container name">
