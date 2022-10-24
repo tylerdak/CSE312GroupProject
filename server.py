@@ -11,7 +11,7 @@ from crypt import PassMan
 from templating import Templating
 import verify
 
-# import json
+import json
 # from numpy import place
 # import pymongo
 
@@ -66,26 +66,31 @@ def retrieveRegisterLoginStyles():
 
 
 
-def createLoginPage(isLoggedIn: bool):
+def createLoginPage(isLoggedIn: bool, userID: string):
     renderedLogin = Templating.injectHTMLBody(srcFile="templates/Login.html")
-    jsInjectableJSON = f"\"{'{'}\\\"isLoggedIn\\\":{'true' if isLoggedIn else 'false'}{'}'}\""
+    jsInjectableJSON = f"\"{'{'}\\\"isLoggedIn\\\":{'true' if isLoggedIn else 'false'}, \\\"userID\\\":\\\"{userID}\\\"{'}'}\""
+
     renderedLogin = Templating.replacePlaceholder(oldText=renderedLogin, placeholder="data",newContent=jsInjectableJSON)
     return renderedLogin
 
 @app.route("/login", methods=['GET'])
 # this assumes the user is not loggged in
 def login():
-    return createLoginPage(isLoggedIn=False)
+    return createLoginPage(isLoggedIn=False, userID="")
 
-@app.route("/workplace/<name>", methods=['GET'])
-def open_workplace(name):
-    workplace = workplaces.find({"workplace": name})
-    for each in workplace:
-        code = each.get("code")
+@app.route("/workplace/<name>/<code>", methods=['GET'])
+def open_workplace(name, code):
+    # Temporary workplace backend. Just finds workplace in database
+    workplace = workplaces.find({"workplace": name, "code": code})
+
     return render_template('Workplace/workplace.html', name=name, code=code)
 
 @app.route("/getstarted", methods=['GET'])
 def getStarted():
+    cookies = request.cookies
+    if cookies.get('userID') == None:
+        return redirect("/", code=302)
+    
     renderedLogin = Templating.injectHTMLBody(srcFile="templates/JoinCreate/joincreate.html")
 
     return renderedLogin
@@ -93,19 +98,22 @@ def getStarted():
 @app.route("/getstarted/create/submit", methods=['POST'])
 def create_workplace():
     workplaceName = request.form['Workplace Name']
-    
-    if workplaces.find_one({"workplace": workplaceName}) != None:
+    workplaceName = escape(workplaceName)
+    cookies = request.cookies
+    if workplaces.find_one({"userID": cookies.get('userID'), "workplace": workplaceName}) != None:
         return redirect("/getstarted", code=403)
     
     joinCode = ''.join(random.choices(string.ascii_uppercase +
                              string.digits, k=20))
-    workplaces.insert_one({"workplace": workplaceName, "code": joinCode})
-    return redirect(url_for('open_workplace', name=workplaceName))
+
+    
+    workplaces.insert_one({"userID": cookies.get('userID'), "workplace": workplaceName, "code": joinCode})
+    return redirect(url_for('open_workplace', name=workplaceName, code=joinCode))
 
 @app.route("/getstarted/join/submit", methods=['POST'])
 def join_workplace():
     joinCode = request.form['Join Code']
-    
+    joinCode = escape(joinCode)
     workplace = workplaces.find_one({"code": joinCode})
     if workplace == None:
         return redirect("/getstarted", code=403)
@@ -114,7 +122,7 @@ def join_workplace():
     workplaceName = ""
     for each in workplace2:
         workplaceName = each.get("workplace")
-    return redirect(url_for('open_workplace', name=workplaceName))
+    return redirect(url_for('open_workplace', name=workplaceName, code=joinCode))
 
 
 @app.route('/', methods=['POST'])
@@ -133,7 +141,7 @@ def insert_display_index():
     else:
         print("Please edit the password")
 
-    return redirect("/", code=302)
+    return redirect("/")
 
 
 @app.route('/login', methods=['POST'])
@@ -150,10 +158,10 @@ def insert_display_login():
         # if password is correct, tell JS to send the user to the /getstarted
         # and store the cookie
         if result is True:
-            return createLoginPage(isLoggedIn=result)
+            return createLoginPage(isLoggedIn=result, userID=username)
 
     # otherwise, fall through to the normal login html
-    return createLoginPage(isLoggedIn=False)
+    return createLoginPage(isLoggedIn=False, userID="")
 
 
 # This function will add cover image  in login and register pages

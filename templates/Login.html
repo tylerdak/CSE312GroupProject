@@ -23,8 +23,9 @@
       const isLoggedIn = jsonData.isLoggedIn;
 
       if (isLoggedIn) {
-        const userID = jsonData.isLoggedIn;
+        const userID = jsonData.userID;
         document.cookie = "userID=" + userID + ";path=/";
+        document.cookie = "isLoggedIn=" + isLoggedIn + ";path=/";
         window.location.replace("/getstarted");
       } else {
         document.cookie =
