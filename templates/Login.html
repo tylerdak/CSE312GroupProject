@@ -25,7 +25,8 @@
       if (isLoggedIn) {
         const userID = jsonData.userID;
         document.cookie = "userID=" + userID + ";path=/";
-        document.cookie = "isLoggedIn=" + isLoggedIn + ";path=/";
+        // We don't need this line because we can just read whether or not userID is present
+        // document.cookie = "isLoggedIn=" + isLoggedIn + ";path=/";
         window.location.replace("/getstarted");
       } else {
         document.cookie =

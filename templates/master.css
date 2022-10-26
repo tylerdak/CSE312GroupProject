@@ -43,3 +43,16 @@
 	background: black;
 	cursor: pointer;
   }
+
+  .navBar {
+	display: flex;
+  }
+
+  .workspaceListCell {
+	background: rgb(236, 190, 250);
+	width: 50vw;
+	margin: 5px;
+	padding-inline: 10px;
+	padding-block: 3px;
+	border-radius: 15px;
+  }

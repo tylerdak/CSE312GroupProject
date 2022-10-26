@@ -11,7 +11,46 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="/styles/master" />
+
+    <script>
+        function getCookie(name) {
+          const value = `; ${document.cookie}`;
+          const parts = value.split(`; ${name}=`);
+          if (parts.length === 2) return parts.pop().split(';').shift();
+          return null;
+        }
+        function openLoggedInProfile() {
+          const userID = getCookie("userID");
+          // alert(userID)
+            if (userID == null) {
+              window.location.replace("/");
+            }
+            else {
+              window.location.replace("/user/"+userID);
+            }
+        }
+        function hideProfileIfLoggedOut() {
+          profButton = document.getElementById("profileButton");
+          const userID = getCookie("userID");
+          if (userID == null) {
+            profButton.hidden = true;
+          }
+        }
+    </script>
+
   </head>
+  <div class="navBar">
   <a href="/" style="text-decoration: none; color: black;"><h2>Votability</h2></a>
+  <div style="width: 80vw;"></div>
+  <h2 id="profileButton" onclick="openLoggedInProfile()">Profile</h2>
+  <!-- once the profile button is loaded, hide it if the user is not logged in -->
+  <script>
+    hideProfileIfLoggedOut()
+  </script>
+  </div>
   {{body}}
+
+  <script>
+
+  </script>
 </html>

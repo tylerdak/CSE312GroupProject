@@ -3,8 +3,9 @@ class validate:
     def verify_password(password: str):
         l, u, n, s = 0, 0, 0, 0
         # lower, upper, number, and special character
-        special_characters = """`~!@#$%^*()_-+={[}}|\:;"',.?"""
+        special_characters = """`~!@#$%^*()_-+|\:;"',.?"""
         # All special characters except <, >, /, and & to prevent HTML injection
+        # Update: I also removed [ ], { }, and =. -Tyler
 
         if 8 < len(password) < 64:
             for i in password:
@@ -19,6 +20,9 @@ class validate:
                 for c in special_characters:
                     if i == c:
                         s += 1
+                        # continue after finding the matching character,
+                        # otherwise you're wasting computational time
+                        continue
                 if i == "<" or i == ">" or i == "&":
                     return False
         if l > 0 and u > 0 and n > 0 and s > 0:

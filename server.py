@@ -1,4 +1,5 @@
 from __future__ import print_function
+from dataclasses import replace
 import sys
 import flask
 from flask import Flask, request, redirect, url_for, render_template
@@ -12,6 +13,7 @@ from templating import Templating
 import verify
 
 import json
+import htmlElements
 # from numpy import place
 # import pymongo
 
@@ -82,8 +84,10 @@ def login():
 def open_workplace(name, code):
     # Temporary workplace backend. Just finds workplace in database
     workplace = workplaces.find({"workplace": name, "code": code})
-
-    return render_template('Workplace/workplace.html', name=name, code=code)
+    outerInjected = Templating.injectHTMLBody(srcFile="./templates/Workplace/workplace.html")
+    withName = replacePlaceholder(outerInjected, placeholder="name", newContent=name)
+    withCode = replacePlaceholder(withName, placeholder="code", newContent=code)
+    return withCode
 
 @app.route("/getstarted", methods=['GET'])
 def getStarted():
@@ -179,6 +183,8 @@ def styleRetrieval(stylesheet):
             content = open('./templates/JoinCreate/joincreate.css', 'rb').read()
         case "modal":
             content = open('./templates/modal.css', 'rb').read()
+        case "profile":
+            content = open('./templates/Profile/profile.css','rb').read()
 
     return content, 200, {'Content-Type': 'text/css'}
 
@@ -190,14 +196,29 @@ def scriptRetrieval(scriptname):
             content = open('./templates/JoinCreate/joincreate.js','rb').read()
     return content, 200, {'Content-Type':'text/js'}
 
-@app.route("/profile", methods=['GET'])
-def showProfile():
+@app.route("/user/<username>", methods=['GET'])
+def showProfile(username):
     # Need change: hardcode username, listNameCreate, ListNameJoin
-    return render_template('/Profile/profile.html', username="{{Username}}", listNameCreate="{{Test}}", ListNameJoin="{{Test}}")
+    outerInjected = Templating.injectHTMLBody(srcFile="./templates/Profile/profile.html")
+    withUsername= replacePlaceholder(outerInjected, "username", username)
 
-@app.route("/profile.css", methods=['GET'])
-def profileCSS():
-    return open('./templates/Profile/profile.css', 'rb').read(), 200, {'Content-Type': 'text/css'}
+    userCreatedWorkspaces = workplaces.find({"userID":username})
+    response = ""
+    listUserCreatedWorkspaces = list(userCreatedWorkspaces)
+    for wp in listUserCreatedWorkspaces:
+        name: str = wp['workplace']
+        code: str = wp['code']
+        withName = replacePlaceholder(htmlElements.profileListedWorkspace, placeholder="workspaceName", newContent=name)
+        withCode = replacePlaceholder(withName, placeholder="workspaceCode", newContent=code)
+        response += withCode
+
+
+    return replacePlaceholder(withUsername, placeholder="listNameCreate",newContent=response)
+
+# moved to styleRetrieval method for coherency's sake
+# @app.route("/profile.css", methods=['GET'])
+# def profileCSS():
+#     return open('./templates/Profile/profile.css', 'rb').read(), 200, {'Content-Type': 'text/css'}
 
 # Site visible on http://127.0.0.1:8081/
 if __name__ == "__main__":
