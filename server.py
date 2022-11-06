@@ -66,6 +66,10 @@ def index():
 def retrieveRegisterLoginStyles():
     return open('./templates/registerLoginStyles.css', 'rb').read(), 200, {'Content-Type': 'text/css'}
 
+@app.route("/chat.css")
+def retrieveChatStyles():
+    return open('./templates/Workplace/chat.css', 'rb').read(), 200, {'Content-Type': 'text/css'}
+
 
 
 def createLoginPage(isLoggedIn: bool, userID: string):
@@ -87,7 +91,7 @@ def open_workplace(name, code):
     outerInjected = Templating.injectHTMLBody(srcFile="./templates/Workplace/workplace.html")
     withName = replacePlaceholder(outerInjected, placeholder="name", newContent=name)
     withCode = replacePlaceholder(withName, placeholder="code", newContent=code)
-    return withCode
+    return withCode, 200, {'Content-Type': 'text/html'}
 
 @app.route("/getstarted", methods=['GET'])
 def getStarted():
@@ -173,9 +177,14 @@ def insert_display_login():
 def getCoverImage():
     return open('./templates/Login/Cover.png', 'rb').read()
 
+@app.route('/msgIcon.png', methods=['GET'])
+def getMsgIcon():
+    return open('./templates/Workplace/msgIcon.png', 'rb').read(), 200, {'Content-Type': 'image/png'}
+
 # Styles retrieval
 @app.route("/styles/<stylesheet>")
 def styleRetrieval(stylesheet):
+    content = ''
     match stylesheet:
         case "master":
             content = open('./templates/master.css')
@@ -185,8 +194,11 @@ def styleRetrieval(stylesheet):
             content = open('./templates/modal.css', 'rb').read()
         case "profile":
             content = open('./templates/Profile/profile.css','rb').read()
+        case "chat":
+            content = open('./templates/Workplace/chat.css','rb').read()
 
     return content, 200, {'Content-Type': 'text/css'}
+
 
 # Script retrieval
 @app.route("/scripts/<scriptname>")
@@ -194,6 +206,8 @@ def scriptRetrieval(scriptname):
     match scriptname:
         case "getstarted":
             content = open('./templates/JoinCreate/joincreate.js','rb').read()
+        case "chat":
+            content = open('./templates/Workplace/chat.js','rb').read()
     return content, 200, {'Content-Type':'text/js'}
 
 @app.route("/user/<username>", methods=['GET'])
