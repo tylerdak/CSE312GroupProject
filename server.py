@@ -88,10 +88,26 @@ def login():
 def open_workplace(name, code):
     # Temporary workplace backend. Just finds workplace in database
     workplace = workplaces.find({"workplace": name, "code": code})
+    for each in workplace:
+        chat = each.get("chat")
+
+    users = "["
+    messages = "["
+    for i in range(len(chat)):
+        users += "\""+ chat[i][0]+"\", "
+        messages  += "\""+ chat[i][1]+"\", "
+    users = users[:-2]
+    messages = messages[:-2]
+    users += "]"
+    messages += "]"
+    print(users)
+    print(messages)
     outerInjected = Templating.injectHTMLBody(srcFile="./templates/Workplace/workplace.html")
     withName = replacePlaceholder(outerInjected, placeholder="name", newContent=name)
     withCode = replacePlaceholder(withName, placeholder="code", newContent=code)
-    return withCode, 200, {'Content-Type': 'text/html'}
+    withUsers = replacePlaceholder(withCode, placeholder="users", newContent=users)
+    withMessages = replacePlaceholder(withUsers, placeholder="messages", newContent=messages)
+    return withMessages, 200, {'Content-Type': 'text/html'}
 
 @app.route("/getstarted", methods=['GET'])
 def getStarted():
@@ -115,7 +131,7 @@ def create_workplace():
                              string.digits, k=20))
 
     
-    workplaces.insert_one({"userID": cookies.get('userID'), "workplace": workplaceName, "code": joinCode})
+    workplaces.insert_one({"userID": cookies.get('userID'), "workplace": workplaceName, "code": joinCode, "chat": []})
     return redirect(url_for('open_workplace', name=workplaceName, code=joinCode))
 
 @app.route("/getstarted/join/submit", methods=['POST'])
@@ -132,6 +148,30 @@ def join_workplace():
         workplaceName = each.get("workplace")
     return redirect(url_for('open_workplace', name=workplaceName, code=joinCode))
 
+@app.route("/chat-history", methods=['POST'])
+def update_messages():
+    data = request.data.decode().split(",")
+    message = data[0]
+    code = data[1]
+    cookies = request.cookies
+
+    workplace = workplaces.find({"code": code})
+    chat = []
+    for each in workplace:
+        chat = each.get("chat")
+    chat.append([cookies.get('userID'), message])
+    workplaces.update_one({"code": code}, {"$set": {"chat": chat}})
+    return redirect("/", code=200)
+
+@app.route("/chat-history/<code>", methods=['GET'])
+def get_messages(code):
+    cookies = request.cookies
+    workplace = workplaces.find({"code": code})
+    chat = []
+    for each in workplace:
+        chat = each.get("chat")
+
+    return redirect("/", code=200)
 
 @app.route('/', methods=['POST'])
 def insert_display_index():

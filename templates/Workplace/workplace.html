@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" />
   </head> -->
-  <body>
+  <body onload="get_chat_history()">
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
@@ -19,9 +19,9 @@
       rel="stylesheet"
     /> -->
     <!-- <h1>Workplace: {{name}}</h1>
+    {{chat}}
     <p>Join Code: {{code}}</p> -->
     <!-- CHAT BAR BLOCK -->
-
     <div class="chat-bar-collapsible">
       <!-- <button id="chat-button" type="button" class="collapsible">
         Chat with us! -->
@@ -41,7 +41,18 @@
               <div id="chatbox">
                 <h5 id="chat-timestamp"></h5>
                 <p id="botStarterMessage" class="botText">
-                  <span><b>{{username: }}</b> Message context...</span>
+                  <!--<span><b>{{username}}</b>{{message}}</span>-->
+                  <script>
+                    const users = {{users}};
+                    const messages = {{messages}};
+                    
+                    let text = "";
+                    for (let i = 0; i < users.length; i++) {
+                      text += "<span><b>"+users[i]+"</b>: "+messages[i]+"</span><br>"
+                    }
+                    console.log(text)
+                    document.getElementById("botStarterMessage").innerHTML = text;
+                  </script>
                 </p>
               </div>
 

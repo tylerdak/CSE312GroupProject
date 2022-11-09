@@ -29,36 +29,65 @@ function sendMessage() {
   if (comment !== "") {
     addToButton(comment);
     //Change the username here
-    socket.send(JSON.stringify({ user: "Taylor", comment: comment }));
+    socket.send(JSON.stringify({ user: getCookie("userID"), comment: comment }));
   }
 }
 
 // Add text to chat
 function addToButton(userText) {
+  user = getCookie("userID");
   const chat = document.getElementById("chatbox");
   chat.innerHTML +=
     `<p class=${"botText"}><span class=${"botText"}><b>` +
-    userText +
+    user +
     "</b>: " +
     userText +
     "<br/></span></p>";
   chat.scrollIntoView(true);
+  const request = new XMLHttpRequest();
+  let url = window.location.href
+  let arr = url.split("/")
+  let code = arr[arr.length-1]
+  request.open("POST", "/chat-history");
+  request.send(userText+","+code);
 }
 
 // Matt
 // This will render the messages sent by the server for any 200 request
 // It will try to get a request to /chat-history
 // Code provided by Jesse for homework
-function get_chat_history() {
-  const request = new XMLHttpRequest();
-  request.onreadystatechange = function () {
-    if (this.readyState === 4 && this.status === 200) {
-      const messages = JSON.parse(this.response);
-      for (const message of messages) {
-        addMessage(message);
-      }
+//function get_chat_history() {
+  // console.log("/chat-history")
+  // const request = new XMLHttpRequest();
+  // request.onreadystatechange = function () {
+  //   if (this.readyState === 4 && this.status === 200) {
+  //     const messages = JSON.parse(this.response);
+  //     for (const message of messages) {
+  //       addMessage(message);
+  //     }
+  //   }
+  // };
+  // let url = window.location.href
+  // let arr = url.split("/")
+  // let code = arr[arr.length-1]
+  // request.open("GET", "/chat-history/"+code);
+  // request.send();
+//}
+
+// Given the name of the cookie it will return the value
+// Source: https://www.w3schools.com/js/js_cookies.asp
+function getCookie(cname) {
+  let name = cname + "=";
+  let decodedCookie = decodeURIComponent(document.cookie);
+  let ca = decodedCookie.split(';');
+  for(let i = 0; i <ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0) == ' ') {
+      c = c.substring(1);
     }
-  };
-  request.open("GET", "/chat-history");
-  request.send();
+    if (c.indexOf(name) == 0) {
+      return c.substring(name.length, c.length);
+    }
+  }
+  return "";
 }
