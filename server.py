@@ -59,7 +59,6 @@ def index():
     # for x in all_users:
     #     email_insert = "Email: ", x.get("email")
     #     all_users_list.insert(0, email_insert)
-
     return Templating.injectHTMLBody(None, srcFile="templates/index.html")
 
 @app.route("/registerLoginStyles.css")
@@ -111,6 +110,7 @@ def open_workplace(name, code):
 
 @app.route("/getstarted", methods=['GET'])
 def getStarted():
+    print(request.headers)
     cookies = request.cookies
     if cookies.get('userID') == None:
         return redirect("/", code=302)

@@ -133,3 +133,5 @@ Private.*
 
 # Ignore IDEA extras
 .idea/
+
+**/.vscode/
