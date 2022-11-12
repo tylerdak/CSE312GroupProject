@@ -3,6 +3,7 @@ from dataclasses import replace
 import sys
 import flask
 from flask import Flask, request, redirect, url_for, render_template
+from flask_socketio import SocketIO, join_room, leave_room
 from pymongo import MongoClient
 import random
 import string
@@ -12,12 +13,16 @@ from crypt import PassMan
 from templating import Templating
 import verify
 
+from Private import flask_secret_key
+
 import json
 import htmlElements
 # from numpy import place
 # import pymongo
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = flask_secret_key
+socketio = SocketIO(app=app)
 
 # client = MongoClient("mongodb+srv://cse312group:db@cluster0.u70wkht.mongodb.net/?retryWrites=true&w=majority")
 client = MongoClient("mongo")
@@ -25,6 +30,8 @@ db = client["CSE312Group"]
 stats = db["stats"]
 users = db["users"]
 workplaces = db["workplaces"]
+
+standardRedirect = redirect("/", code=302)
 
 
 def escape(htmlStr):
@@ -49,6 +56,15 @@ def incrementPageViewCount():
     stats.update_one({"label": "viewCount"}, {"$set": {"value": counter + 1}})
     return counter + 1
 
+def validAuthToken(authCookie: str):
+    try:
+        userAuth = authCookie
+        if userAuth == None or users.find_one({"authToken": userAuth}) == None:
+            return False
+        return True
+    except KeyError:
+        return False
+
 
 @app.route("/")
 def index():
@@ -71,9 +87,9 @@ def retrieveChatStyles():
 
 
 
-def createLoginPage(isLoggedIn: bool, userID: string):
+def createLoginPage(isLoggedIn: bool, authToken: string):
     renderedLogin = Templating.injectHTMLBody(srcFile="templates/Login.html")
-    jsInjectableJSON = f"\"{'{'}\\\"isLoggedIn\\\":{'true' if isLoggedIn else 'false'}, \\\"userID\\\":\\\"{userID}\\\"{'}'}\""
+    jsInjectableJSON = f"\"{'{'}\\\"isLoggedIn\\\":{'true' if isLoggedIn else 'false'}, \\\"userID\\\":\\\"{authToken}\\\"{'}'}\""
 
     renderedLogin = Templating.replacePlaceholder(oldText=renderedLogin, placeholder="data",newContent=jsInjectableJSON)
     return renderedLogin
@@ -81,38 +97,47 @@ def createLoginPage(isLoggedIn: bool, userID: string):
 @app.route("/login", methods=['GET'])
 # this assumes the user is not loggged in
 def login():
-    return createLoginPage(isLoggedIn=False, userID="")
+    return createLoginPage(isLoggedIn=False, authToken="")
 
-@app.route("/workplace/<name>/<code>", methods=['GET'])
-def open_workplace(name, code):
+@app.route("/workplace/<code>", methods=['GET'])
+def open_workplace(code):
+    
+    if not validAuthToken(authCookie=request.cookies.get("userID")):
+        return redirect("/", code=302)
+
     # Temporary workplace backend. Just finds workplace in database
-    workplace = workplaces.find({"workplace": name, "code": code})
-    for each in workplace:
-        chat = each.get("chat")
+    workplace = workplaces.find_one({"code": code})
 
-    users = "["
-    messages = "["
-    for i in range(len(chat)):
-        users += "\""+ chat[i][0]+"\", "
-        messages  += "\""+ chat[i][1]+"\", "
-    users = users[:-2]
-    messages = messages[:-2]
-    users += "]"
-    messages += "]"
-    print(users)
-    print(messages)
+    chat = []
+    chatGet = workplace.get("chat")
+    if chatGet != None:
+        chat = chatGet
+        
+    usersArray = "["
+    messagesArray = "["
+    if chat != []:
+       
+        for i in range(len(chat)):
+            usersArray += "\""+ chat[i][0]+"\", "
+            messagesArray  += "\""+ chat[i][1]+"\", "
+        usersArray = usersArray[:-2]
+        messagesArray = messagesArray[:-2]
+    usersArray += "]"
+    messagesArray += "]"
+    print(usersArray)
+    print(messagesArray)
     outerInjected = Templating.injectHTMLBody(srcFile="./templates/Workplace/workplace.html")
-    withName = replacePlaceholder(outerInjected, placeholder="name", newContent=name)
+    withName = replacePlaceholder(outerInjected, placeholder="name", newContent=workplace.get("workplace"))
     withCode = replacePlaceholder(withName, placeholder="code", newContent=code)
-    withUsers = replacePlaceholder(withCode, placeholder="users", newContent=users)
-    withMessages = replacePlaceholder(withUsers, placeholder="messages", newContent=messages)
+    withUsers = replacePlaceholder(withCode, placeholder="users", newContent=usersArray)
+    withMessages = replacePlaceholder(withUsers, placeholder="messages", newContent=messagesArray)
     return withMessages, 200, {'Content-Type': 'text/html'}
 
 @app.route("/getstarted", methods=['GET'])
 def getStarted():
     print(request.headers)
     cookies = request.cookies
-    if cookies.get('userID') == None:
+    if not validAuthToken(authCookie=cookies.get("userID")):
         return redirect("/", code=302)
     
     renderedLogin = Templating.injectHTMLBody(srcFile="templates/JoinCreate/joincreate.html")
@@ -121,6 +146,8 @@ def getStarted():
 
 @app.route("/getstarted/create/submit", methods=['POST'])
 def create_workplace():
+    if not validAuthToken(authCookie=request.cookies.get("userID")):
+        return redirect("/", code=302)
     workplaceName = request.form['Workplace Name']
     workplaceName = escape(workplaceName)
     cookies = request.cookies
@@ -132,7 +159,7 @@ def create_workplace():
 
     
     workplaces.insert_one({"userID": cookies.get('userID'), "workplace": workplaceName, "code": joinCode, "chat": []})
-    return redirect(url_for('open_workplace', name=workplaceName, code=joinCode))
+    return redirect(url_for('open_workplace',code=joinCode))
 
 @app.route("/getstarted/join/submit", methods=['POST'])
 def join_workplace():
@@ -148,40 +175,47 @@ def join_workplace():
         workplaceName = each.get("workplace")
     return redirect(url_for('open_workplace', name=workplaceName, code=joinCode))
 
-@app.route("/chat-history", methods=['POST'])
-def update_messages():
+def getUsernameFromAuthToken(authToken: str):
+    return authToken
+
+def makeMessage(username: str, message: str, code: str):
+    return {"username": username, "message": message, "code": code}
+
+def update_messages(newMessageJSON: json):
     data = request.data.decode().split(",")
-    message = data[0]
-    code = data[1]
-    cookies = request.cookies
+    message = newMessageJSON["comment"]
+
+    # the user property is = userID as of writing this
+    # however, when we add auth tokens, .user will be the auth token
+    # we will need to match the auth token to a userID to find the actual userID
+    # do NOT send auth tokens as the userID (exposes the user's account, very insecure)
+    userID = newMessageJSON["user"]
+    code = newMessageJSON["workplaceCode"]
+    
+    if not validAuthToken(authCookie=userID):
+        return standardRedirect
+
+    # here's a place where you can convert the authToken to the username
+    resultingUsername = getUsernameFromAuthToken(userID)
 
     workplace = workplaces.find({"code": code})
     chat = []
     for each in workplace:
         chat = each.get("chat")
-    chat.append([cookies.get('userID'), message])
+    chat.append([resultingUsername, message])
     workplaces.update_one({"code": code}, {"$set": {"chat": chat}})
-    return redirect("/", code=200)
-
-@app.route("/chat-history/<code>", methods=['GET'])
-def get_messages(code):
-    cookies = request.cookies
-    workplace = workplaces.find({"code": code})
-    chat = []
-    for each in workplace:
-        chat = each.get("chat")
-
-    return redirect("/", code=200)
+    return makeMessage(userID, message, code)
 
 @app.route('/', methods=['POST'])
 def insert_display_index():
-    username = request.form['username']
-    password = request.form['psw']
+    username = escape(request.form['username'])
+    password = escape(request.form['psw'])
     password_result = verify.validate.verify_password(password)      # return True or False
     username_result = verify.validate.verify_username(username)
     if password_result:
         if username_result:
-            users.insert_one({"username": username, "password": PassMan.hash(password.encode())})
+            # change the auth token, add a generator for it and all that
+            users.insert_one({"username": username, "password": PassMan.hash(password.encode()), "authToken": username})
             print("Your account has been created successfully")
             return redirect("/login", code=302)
         else:
@@ -194,8 +228,8 @@ def insert_display_index():
 
 @app.route('/login', methods=['POST'])
 def insert_display_login():
-    username = request.form['username']
-    password = request.form['psw']
+    username = escape(request.form['username'])
+    password = escape(request.form['psw'])
 
     proposedUser = users.find_one({"username":username})
     if proposedUser is None:
@@ -206,10 +240,10 @@ def insert_display_login():
         # if password is correct, tell JS to send the user to the /getstarted
         # and store the cookie
         if result is True:
-            return createLoginPage(isLoggedIn=result, userID=username)
+            return createLoginPage(isLoggedIn=result, authToken=proposedUser["authToken"])
 
     # otherwise, fall through to the normal login html
-    return createLoginPage(isLoggedIn=False, userID="")
+    return createLoginPage(isLoggedIn=False, authToken="")
 
 
 # This function will add cover image  in login and register pages
@@ -269,6 +303,33 @@ def showProfile(username):
 
     return replacePlaceholder(withUsername, placeholder="listNameCreate",newContent=response)
 
+# WEBSOCKET STUFF
+
+# when user joins room
+@socketio.on('initialDataRequest')
+def initialSend(data):
+    authID = data['authToken']
+    username = getUsernameFromAuthToken(authID)
+    room = data['code']
+    join_room(room)
+    broadcastNewMessage([makeMessage("SERVER", f"{username} entered the room.", room)], code=room)
+
+@socketio.on('message')
+def handle_unnamed_message(message):
+    print(f"handle_message: {str(message)}")
+    newMessage = update_messages(json.loads(message))
+    broadcastNewMessage(messages=[newMessage], code=newMessage["code"])
+
+@socketio.on('json')
+def handle_unnamed_json(json):
+    print(f"handle_json: {str(json)}")
+    print(type(json))
+
+# broadcast to all clients for new message
+def broadcastNewMessage(messages: list[dict], code: str):
+    sendableMessages = map(lambda x: (json.loads(x)), messages)
+    socketio.emit('newMessage', {'messages': messages}, to=code)
+
 # moved to styleRetrieval method for coherency's sake
 # @app.route("/profile.css", methods=['GET'])
 # def profileCSS():
@@ -280,4 +341,4 @@ if __name__ == "__main__":
     countValue = {"value": 0}
     stats.update_one(countStat, {"$setOnInsert": countValue}, upsert=True)
 
-    app.run(host="0.0.0.0", port=8081, debug=True)
+    socketio.run(app,host="0.0.0.0", port=8081, debug=True)

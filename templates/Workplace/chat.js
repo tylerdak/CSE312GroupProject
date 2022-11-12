@@ -14,8 +14,33 @@ for (let i = 0; i < coll.length; i++) {
   });
 }
 
+function addMessagesToChat(messages) {
+  var text = ""
+  for (let i = 0; i < messages.length; i++) {
+    console.log(messages[i])
+    console.log(messages[i]["username"])
+    text += "<span><b>"+messages[i]["username"]+"</b>: "+messages[i]["message"]+"</span><br>"
+  }
+  document.getElementById("botStarterMessage").innerHTML += text;
+}
+
 // Establish a WebSocket connection with the server
-const socket = new WebSocket("ws://" + window.location.host + "/websocket");
+var socket = io(); // new WebSocket("ws://" + window.location.host + "/websocket");
+socket.on('connect', function() {
+  socket.emit('initialDataRequest', {
+      code: thisWorkplaceCode,
+      authToken: getCookie("userID")
+  });
+});
+
+socket.on('newMessage', function(messageSet) {
+  console.log(messageSet);
+  addMessagesToChat(messageSet["messages"]);
+});
+
+const thisPath = window.location.pathname
+const thisWorkplaceCode = thisPath.split("/").pop()
+
 
 // Tyler
 // Sends JSON data to websocket
@@ -23,33 +48,37 @@ const socket = new WebSocket("ws://" + window.location.host + "/websocket");
 function sendMessage() {
   const chatBox = document.getElementById("textInput");
   const comment = chatBox.value;
-  console.log("hi");
   chatBox.value = "";
   chatBox.focus();
   if (comment !== "") {
-    addToButton(comment);
+    // addToButton(comment);
     //Change the username here
-    socket.send(JSON.stringify({ user: getCookie("userID"), comment: comment }));
+    socket.send(JSON.stringify({ 
+      user: getCookie("userID"), 
+      comment: comment,
+      workplaceCode: thisWorkplaceCode
+     }));
   }
 }
 
 // Add text to chat
 function addToButton(userText) {
-  user = getCookie("userID");
-  const chat = document.getElementById("chatbox");
-  chat.innerHTML +=
-    `<p class=${"botText"}><span class=${"botText"}><b>` +
-    user +
-    "</b>: " +
-    userText +
-    "<br/></span></p>";
-  chat.scrollIntoView(true);
-  const request = new XMLHttpRequest();
-  let url = window.location.href
-  let arr = url.split("/")
-  let code = arr[arr.length-1]
-  request.open("POST", "/chat-history");
-  request.send(userText+","+code);
+  sendMessage()
+  // user = getCookie("userID");
+  // const chat = document.getElementById("chatbox");
+  // chat.innerHTML +=
+  //   `<p class=${"botText"}><span class=${"botText"}><b>` +
+  //   user +
+  //   "</b>: " +
+  //   userText +
+  //   "<br/></span></p>";
+  // chat.scrollIntoView(true);
+  // const request = new XMLHttpRequest();
+  // let url = window.location.href
+  // let arr = url.split("/")
+  // let code = arr[arr.length-1]
+  // request.open("POST", "/chat-history");
+  // request.send(userText+","+code);
 }
 
 // Matt
