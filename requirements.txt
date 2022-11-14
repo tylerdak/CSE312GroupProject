@@ -3,3 +3,4 @@ pymongo
 bcrypt
 bs4
 # dnspython
+flask-socketio 
