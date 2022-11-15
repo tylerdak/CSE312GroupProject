@@ -170,3 +170,107 @@
     border-radius: 0px;
   }
 }
+/* Brainstorm css */
+ul {
+  margin: 0;
+  padding: 0;
+}
+
+/* Style the list items */
+ul li {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+
+.optionButton {
+  cursor: pointer;
+  position: relative;
+  padding: 12px 8px 12px 40px;
+  list-style-type: none;
+  background: #ddd;
+  font-size: 18px;
+  transition: 0.2s;
+  width: 10%;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  display: flex;
+  column-gap: 80px;
+}
+
+/* Darker background-color on hover */
+.optionButton:hover {
+  background: #a1d8ff;
+}
+
+.checked {
+  background: #a1d8ff;
+}
+
+.percentBar {
+  flex-grow: 2;
+  /* background: #a1d8ff; */
+}
+
+.percentBarColor {
+  display: flex;
+  justify-content: center;
+  padding: 12px 0px 12px 0px;
+  background: #a1d8ff;
+  -webkit-transition: width 1s ease;
+  -moz-transition: width 1s ease;
+  -o-transition: width 1s ease;
+  transition: width 1s ease;
+}
+
+.close {
+  position: absolute;
+  right: 0;
+  top: 0;
+  /* padding: 10px 10px 10px 10px; */
+}
+
+.header:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+/* Style the input */
+input {
+  margin: 0;
+  border: none;
+  border-radius: 0;
+  width: 60%;
+  padding: 10px;
+  float: left;
+  font-size: 16px;
+}
+
+/* Style the "Add" button */
+.addBtn {
+  padding: 10px;
+  width: 15%;
+  background: #ddf3ff;
+  color: #00678a;
+  font-weight: bold;
+  float: left;
+  text-align: center;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.3s;
+  border-radius: 0;
+}
+li.selected {
+  color: green;
+}
+
+.addBtn:hover {
+  background-color: #00678a;
+  color: #ddf3ff;
+}
+
+.brainstorm {
+  margin-left: 400px;
+  margin-right: 100px;
+}
