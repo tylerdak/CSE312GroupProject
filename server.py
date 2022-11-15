@@ -317,7 +317,8 @@ def initialSend(data):
 @socketio.on('message')
 def handle_unnamed_message(message):
     print(f"handle_message: {str(message)}")
-    newMessage = update_messages(json.loads(message))
+    escaped_message = escape(message)
+    newMessage = update_messages(json.loads(escaped_message))
     broadcastNewMessage(messages=[newMessage], code=newMessage["code"])
 
 @socketio.on('json')
@@ -341,4 +342,4 @@ if __name__ == "__main__":
     countValue = {"value": 0}
     stats.update_one(countStat, {"$setOnInsert": countValue}, upsert=True)
 
-    socketio.run(app,host="0.0.0.0", port=8081, debug=True)
+    socketio.run(app,host="0.0.0.0", port=8081, debug=True, allow_unsafe_werkzeug=True)
