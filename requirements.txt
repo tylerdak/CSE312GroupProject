@@ -4,3 +4,4 @@ bcrypt
 bs4
 # dnspython
 flask-socketio 
+eventlet
