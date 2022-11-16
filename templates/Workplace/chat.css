@@ -186,25 +186,28 @@ ul li {
 .optionButton {
   cursor: pointer;
   position: relative;
-  padding: 12px 8px 12px 40px;
+  padding: 12px 0px 12px 0px;
   list-style-type: none;
-  background: #ddd;
+  /*background: #ddd;*/
   font-size: 18px;
   transition: 0.2s;
-  width: 10%;
+  width: 30%;
   margin-top: 10px;
   margin-bottom: 10px;
   display: flex;
   column-gap: 80px;
+  justify-content: center;
 }
 
 /* Darker background-color on hover */
 .optionButton:hover {
-  background: #a1d8ff;
+  /*background: #a1d8ff;*/
+  opacity: 0.5;
 }
 
 .checked {
-  background: #a1d8ff;
+  /*background: #a1d8ff;*/
+  border-style: solid;
 }
 
 .percentBar {

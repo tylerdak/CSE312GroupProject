@@ -303,6 +303,26 @@ def showProfile(username):
 
     return replacePlaceholder(withUsername, placeholder="listNameCreate",newContent=response)
 
+@app.route("/usercolor/<code>", methods=['POST'])
+def testusercolor(code):
+    cookies = request.cookies
+    color = request.form["color"]
+    user = cookies.get("userID")
+    usercolor = user + "color"
+    workplaces.update_one({"code": code}, {"$set": {usercolor: color}})
+    return color
+
+@app.route("/usercolor/<code>", methods=['GET'])
+def getusercolor(code):
+    cookies = request.cookies
+    workplace = workplaces.find({"code": code})
+    for each in workplace:
+        color = each.get(cookies.get("userID")+"color")
+    
+    if color == None:
+        color = "None"
+    return color
+
 # WEBSOCKET STUFF
 
 # when user joins room

@@ -183,6 +183,12 @@ function handleOptions(option) {
 // Create a new list item when clicking on the "Add" button
 function newElement() {
   const inputValue = document.getElementById("myInput").value;
+  getColor();
+  color = getCookie("color")
+  if(color === "None") {
+    addColor();
+    color = getCookie("color")
+  }
 
   if (inputValue === "") {
     alert("You must write something");
@@ -206,6 +212,7 @@ function newElement() {
   };
   option.setAttribute("class", "optionButton");
   option.setAttribute("id", inputValue + "Button");
+  option.setAttribute("style", `background-color: ${color}`);
 
   percentBar.setAttribute("id", inputValue);
   percentBar.setAttribute("class", "percentBar");
@@ -235,4 +242,53 @@ function newElement() {
 
   document.getElementById("myUL").appendChild(list);
   document.getElementById("myInput").value = "";
+}
+
+function userColor() {
+    let maxVal = 0xFFFFFF; // 16777215
+    let randomNumber = Math.random() * maxVal; 
+    randomNumber = Math.floor(randomNumber);
+    randomNumber = randomNumber.toString(16);
+    let randColor = randomNumber.padStart(6, 0);   
+    return `#${randColor.toUpperCase()}`
+}
+
+function addColor() {
+  let xhr = new XMLHttpRequest();
+  paths = window.location.pathname.split("/")
+  code = paths[2]
+
+  xhr.open("POST", '/usercolor/'+code, false);
+  xhr.setRequestHeader('content-type', 'application/x-www-form-urlencoded;charset=UTF-8');
+  xhr.onload = function () {
+
+    // Process our return data
+    if (xhr.status >= 200 && xhr.status < 300) {
+      // Runs when the request is successful
+      document.cookie = "color="+xhr.responseText;
+    } else {
+      // Runs when it's not
+      document.cookie = "color=None";
+    }
+  }
+  xhr.send("color=" + userColor());
+}
+
+function getColor() {
+  let xhr = new XMLHttpRequest();
+  paths = window.location.pathname.split("/")
+  code = paths[2]
+  xhr.open("GET", '/usercolor/'+code, false);
+  xhr.onload = function () {
+
+    // Process our return data
+    if (xhr.status >= 200 && xhr.status < 300) {
+      // Runs when the request is successful
+      document.cookie = "color="+xhr.responseText;
+    } else {
+      // Runs when it's not
+      document.cookie = "color=None";
+    }
+  }
+  xhr.send();
 }
