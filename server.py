@@ -338,11 +338,11 @@ def initialSend(data):
 @socketio.on('message')
 def handle_unnamed_message(message):
     print(f"handle_message: {str(message)}")
-
+    escaped_message = escape(message)
     if "question_input" and "idea_input" in message:
-        question_input = message.split(",")[0][19:-1]
-        idea_input = message.split(",")[1][14:-1]
-        workplace_code = message.split(",")[2][17:-2]
+        question_input = escaped_message.split(",")[0][19:-1]
+        idea_input = escaped_message.split(",")[1][14:-1]
+        workplace_code = escaped_message.split(",")[2][17:-2]
 
         poll_message = {"question_input": question_input, "idea_input": idea_input, "workplace_code_1": workplace_code}
         new_message_list = [poll_message]
@@ -352,7 +352,6 @@ def handle_unnamed_message(message):
 
     else:
         print(f"handle_message: {str(message)}")
-        escaped_message = escape(message)
         newMessage = update_messages(json.loads(escaped_message))
         broadcastNewMessage(messages=[newMessage], code=newMessage["code"])
 
