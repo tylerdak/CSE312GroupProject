@@ -334,12 +334,28 @@ def initialSend(data):
     join_room(room)
     broadcastNewMessage([makeMessage("SERVER", f"{username} entered the room.", room)], code=room)
 
+
 @socketio.on('message')
 def handle_unnamed_message(message):
     print(f"handle_message: {str(message)}")
-    escaped_message = escape(message)
-    newMessage = update_messages(json.loads(escaped_message))
-    broadcastNewMessage(messages=[newMessage], code=newMessage["code"])
+
+    if "question_input" and "idea_input" in message:
+        question_input = message.split(",")[0][19:-1]
+        idea_input = message.split(",")[1][14:-1]
+        workplace_code = message.split(",")[2][17:-2]
+
+        poll_message = {"question_input": question_input, "idea_input": idea_input, "workplace_code_1": workplace_code}
+        new_message_list = [poll_message]
+        # print("new_message_list", new_message_list)
+        # print("workplace_code_1", workplace_code_1)
+        socketio.emit('poll_message', {'poll_message': poll_message}, to=workplace_code)
+
+    else:
+        print(f"handle_message: {str(message)}")
+        escaped_message = escape(message)
+        newMessage = update_messages(json.loads(escaped_message))
+        broadcastNewMessage(messages=[newMessage], code=newMessage["code"])
+
 
 @socketio.on('json')
 def handle_unnamed_json(json):
@@ -362,4 +378,4 @@ if __name__ == "__main__":
     countValue = {"value": 0}
     stats.update_one(countStat, {"$setOnInsert": countValue}, upsert=True)
 
-    socketio.run(app,host="0.0.0.0", port=8081, debug=True, allow_unsafe_werkzeug=True)
+    socketio.run(app,host="0.0.0.0", port=8081, debug=True)

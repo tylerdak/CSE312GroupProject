@@ -41,9 +41,21 @@ socket.on("connect", function () {
 });
 
 socket.on("newMessage", function (messageSet) {
-  console.log(messageSet);
+  console.log("messageSet" + messageSet);
   addMessagesToChat(messageSet["messages"]);
 });
+
+
+socket.on("poll_message", function (poll_message) {
+  var test1 = poll_message["poll_message"]
+  console.log(test1);
+  var idea_input = test1["idea_input"]
+  //console.log("Idea "+idea_input)
+
+  newElement_create(idea_input)
+
+});
+
 
 const thisPath = window.location.pathname;
 const thisWorkplaceCode = thisPath.split("/").pop();
@@ -198,6 +210,22 @@ function newElement() {
     return;
   }
 
+  // EJ
+  const question = document.getElementById("questionInput").value
+  const idea = document.getElementById("myInput").value
+  console.log("question", question);
+  console.log("idea", idea);
+
+  socket.send(
+    JSON.stringify({
+      question_input: question,
+      idea_input: idea,
+      workplaceCode: thisWorkplaceCode,
+    })
+  );
+}
+
+function newElement_create(inputValue) {
   const list = document.createElement("li");
   const option = document.createElement("div");
   const percentBar = document.createElement("div");
@@ -212,7 +240,9 @@ function newElement() {
   };
   option.setAttribute("class", "optionButton");
   option.setAttribute("id", inputValue + "Button");
-  option.setAttribute("style", `background-color: ${color}`);
+
+  //The line below will cause some errors, no color now but will fix it later
+  //option.setAttribute("style", `background-color: ${color}`);
 
   percentBar.setAttribute("id", inputValue);
   percentBar.setAttribute("class", "percentBar");
