@@ -251,6 +251,18 @@ def insert_display_login():
 def getCoverImage():
     return open('./templates/Login/Cover.png', 'rb').read()
 
+@app.route('/create.png', methods=['GET'])
+def getCreateImage():
+    return open('./templates/JoinCreate/create.png', 'rb').read(), 200, {'Content-Type': 'image/png'}
+
+@app.route('/join.png', methods=['GET'])
+def getJoinImage():
+    return open('./templates/JoinCreate/join.png', 'rb').read(), 200, {'Content-Type': 'image/png'}
+
+@app.route('/logo.png', methods=['GET'])
+def getLogoImage():
+    return open('./templates/logo.png', 'rb').read(), 200, {'Content-Type': 'image/png'}
+
 @app.route('/msgIcon.png', methods=['GET'])
 def getMsgIcon():
     return open('./templates/Workplace/msgIcon.png', 'rb').read(), 200, {'Content-Type': 'image/png'}

@@ -13,44 +13,60 @@
     <link rel="stylesheet" href="/styles/master" />
 
     <script>
-        function getCookie(name) {
-          const value = `; ${document.cookie}`;
-          const parts = value.split(`; ${name}=`);
-          if (parts.length === 2) return parts.pop().split(';').shift();
-          return null;
+      function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(";").shift();
+        return null;
+      }
+      function openLoggedInProfile() {
+        const userID = getCookie("userID");
+        // alert(userID)
+        if (userID == null) {
+          window.location.replace("/");
+        } else {
+          window.location.replace("/user/" + userID);
         }
-        function openLoggedInProfile() {
-          const userID = getCookie("userID");
-          // alert(userID)
-            if (userID == null) {
-              window.location.replace("/");
-            }
-            else {
-              window.location.replace("/user/"+userID);
-            }
+      }
+      function hideProfileIfLoggedOut() {
+        profButton = document.getElementById("profileButton");
+        const userID = getCookie("userID");
+        if (userID == null) {
+          profButton.hidden = true;
         }
-        function hideProfileIfLoggedOut() {
-          profButton = document.getElementById("profileButton");
-          const userID = getCookie("userID");
-          if (userID == null) {
-            profButton.hidden = true;
-          }
-        }
+      }
     </script>
-
   </head>
-  <div class="navBar">
-  <a href="/" style="text-decoration: none; color: black;"><h2>Votability</h2></a>
-  <div style="width: 80vw;"></div>
-  <h2 id="profileButton" onclick="openLoggedInProfile()">Profile</h2>
+
+  <nav>
+    <div>
+      <a to="/">
+        <h4><img class="logoName" src="./logo.png"></img>Votability</h4>
+      </a>
+    </div>
+    <div class="dropdown">
+      <ul>
+        <a onclick="hideProfileIfLoggedOut()"> <h2>=</h2></a>
+      </ul>
+      <div class="dropdown-content">
+        <a id="profileButton" onclick="openLoggedInProfile()">Profile</a>
+        <a href="#">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- <div class="navBar">
+    <a href="/" style="text-decoration: none; color: black"
+      ><h2>Votability</h2></a
+    >
+    <div style="width: 80vw"></div>
+    <h2 id="profileButton" onclick="openLoggedInProfile()">Profile</h2> -->
   <!-- once the profile button is loaded, hide it if the user is not logged in -->
   <script>
-    hideProfileIfLoggedOut()
+    hideProfileIfLoggedOut();
   </script>
-  </div>
+  <!-- </div> -->
   {{body}}
 
-  <script>
-
-  </script>
+  <script></script>
 </html>

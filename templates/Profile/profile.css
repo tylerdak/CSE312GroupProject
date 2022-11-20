@@ -46,7 +46,33 @@ body {
   cursor: pointer;
   font-family: "Raleway", sans-serif;
 }
-
+.changeusername {
+  font-size: x-large;
+  border: 0;
+  outline: 0;
+  color: #3a3b3c;
+  background-color: #f4f7f6;
+  padding-left: 110px;
+  padding-top: 100px;
+  padding-bottom: 100px;
+}
+::placeholder {
+  /* Chrome, Firefox, Opera, Safari 10.1+ */
+  color: #3a3b3c;
+  opacity: 1; /* Firefox */
+}
+.saveButton {
+  font-size: small;
+  color: #00678a;
+  background-color: #ddf3ff;
+  border: none;
+  padding: 10px;
+  border-radius: 5px;
+}
+.saveButton:hover {
+  color: #ddf3ff;
+  background-color: #00678a;
+}
 @media screen and (min-width: 1024px) {
   .split-screen {
     flex-direction: row;
