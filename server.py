@@ -173,7 +173,7 @@ def join_workplace():
     workplaceName = ""
     for each in workplace2:
         workplaceName = each.get("workplace")
-    return redirect(url_for('open_workplace', name=workplaceName, code=joinCode))
+    return redirect(url_for('open_workplace', code=joinCode))
 
 def getUsernameFromAuthToken(authToken: str):
     return authToken

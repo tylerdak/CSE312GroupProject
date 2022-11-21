@@ -32,7 +32,7 @@ class validate:
 
     def verify_username(username: str):
         special_characters = "<>&/"
-        if 2 < len(username) < 21:
+        if 2 <= len(username) < 21:
             for x in username:
                 if x == " ":
                     return False

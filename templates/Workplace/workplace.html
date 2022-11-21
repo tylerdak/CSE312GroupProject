@@ -19,9 +19,7 @@
       href="https://fonts.googleapis.com/css2?family=Abhaya+Libre:wght@400;500;600;700;800&family=Raleway:ital,wght@0,100;0,200;0,300;1,100;1,200;1,300&display=swap"
       rel="stylesheet"
     /> -->
-    <!-- <h1>Workplace: {{name}}</h1>
-    {{chat}}
-    <p>Join Code: {{code}}</p> -->
+
     <!-- CHAT BAR BLOCK -->
     <div class="chat-bar-collapsible">
       <!-- <button id="chat-button" type="button" class="collapsible">
@@ -96,8 +94,10 @@
     </div>
     <!-- http://localhost:8081/workplace/3JGNYRNY15Z1X2J9H9QW -->
     <div class="brainstorm">
-    <div id="myDIV" class="header">
-      <h2 style="margin: 5px">Problem {{problemNumber}}</h2>
+      <h1>Workplace: {{name}}</h1>
+      <p>Join Code: {{code}}</p>
+    <div id="myDIV" style="margin: 5px" class="header">
+      <h2  hidden>Problem {{problemNumber}}</h2>
       <input type="text" id="questionInput" placeholder="Type question here..." />
       <input type="text" id="myInput" placeholder="Type your idea here..." />
       <span onclick="newElement();" class="addBtn">Add</span>
