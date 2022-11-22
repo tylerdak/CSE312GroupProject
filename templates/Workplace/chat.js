@@ -36,7 +36,7 @@ var socket = io(); // new WebSocket("ws://" + window.location.host + "/websocket
 socket.on("connect", function () {
   socket.emit("initialDataRequest", {
     code: thisWorkplaceCode,
-    authToken: getCookie("userID"),
+    authToken: getCookie("auth"),
   });
 });
 
@@ -73,9 +73,9 @@ function sendMessage() {
     //Change the username here
     socket.send(
       JSON.stringify({
-        user: getCookie("userID"),
         comment: comment,
         workplaceCode: thisWorkplaceCode,
+        authToken: getCookie("auth")
       })
     );
   }
