@@ -381,9 +381,18 @@ def handle_unnamed_message(message):
 
         poll_message = {"question_input": question_input, "idea_input": idea_input, "workplace_code_1": workplace_code}
         new_message_list = [poll_message]
-        # print("new_message_list", new_message_list)
-        # print("workplace_code_1", workplace_code_1)
         socketio.emit('poll_message', {'poll_message': poll_message}, to=workplace_code)
+
+    elif "options_server" and "totalVotes_server" in message:
+
+        poll_result = verify.process.process_result(escaped_message)
+
+        result_message = {"options_server": poll_result[0], "total_votes_server": poll_result[1], "workplace_code_1": poll_result[2]}
+        socketio.emit('result_message', {'result_message': result_message}, to=poll_result[2])
+
+        # print("options_server", options_server)
+        # print("totalVotes_server", total_votes_server)
+        # print("workplace_code", workplace_code)
 
     else:
         

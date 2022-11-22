@@ -57,6 +57,37 @@ socket.on("poll_message", function (poll_message) {
 });
 
 
+socket.on("result_message", function (result_message) {
+  var result_message = result_message["result_message"]
+  var options_server = result_message["options_server"]
+  var total_votes_server = result_message["total_votes_server"]
+  total3 = parseInt(total_votes_server)
+
+  totalVotes = total3
+  options = options_server
+  console.log("totalVotes" + totalVotes);
+  console.log("options" + options);
+
+  for (const key in options) {
+    const percentBarColor2 = document.getElementById(key + "Color");
+    if (totalVotes === 0 || options[key] === 0) {
+      percentBarColor2.setAttribute("style", `width:${0}%`);
+      percentBarColor2.innerHTML = "\u00A0";
+    } else {
+      percentBarColor2.setAttribute(
+        "style",
+        `width:${Math.round(100 * (options[key] / totalVotes))}%`
+      );
+      percentBarColor2.innerHTML = `${Math.round(
+        100 * (options[key] / totalVotes)
+      )}%`;
+    }
+  }
+  //handleOptions(options)
+
+});
+
+
 const thisPath = window.location.pathname;
 const thisWorkplaceCode = thisPath.split("/").pop();
 
@@ -188,6 +219,14 @@ function handleOptions(option) {
       )}%`;
     }
   }
+
+  socket.send(
+    JSON.stringify({
+      options_server: options,
+      totalVotes_server: totalVotes,
+      workplaceCode: thisWorkplaceCode,
+    })
+  );
 
   console.log("total", totalVotes);
 }

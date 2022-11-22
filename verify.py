@@ -1,3 +1,6 @@
+import ast
+
+
 class validate:
 
     def verify_password(password: str):
@@ -42,6 +45,24 @@ class validate:
             return True
         else:
             return False
+
+
+class process:
+    def process_result(input: str):
+        delimiter_1 = '"options_server":'
+        delimiter_2 = ',"totalVotes_server":'
+        delimiter_3 = ',"workplaceCode":"'
+
+        data_index_1 = input.find(delimiter_1)
+        data_index_2 = input.find(delimiter_2)
+        data_index_3 = input.find(delimiter_3)
+
+        options_pre = input[data_index_1 + len(delimiter_1):data_index_2]
+        total_votes_server = input[data_index_2 + len(delimiter_2):data_index_3]
+        workplace_code = input[data_index_3 + len(delimiter_3):-2]
+        options_server = ast.literal_eval(options_pre)
+        return_value = [options_server, total_votes_server, workplace_code]
+        return return_value
 
 
 # For testing purpose
