@@ -6,6 +6,11 @@
   <link rel="stylesheet" href="/styles/profile" />
   <div class="profile">
     <!-- <h3 class="username">{{username}}</h3> -->
+    <form 
+    action="/changename"
+        method="post"
+        enctype="multipart/form-data"
+      >
     <input
       class="changeusername"
       id="form-username"
@@ -13,8 +18,8 @@
       name="username"
       placeholder="{{username}}"
     />
-    <input class="saveButton" type="submit" value="Save" />
-
+    <input class="saveButton" type="{{type}}" value="Save"/>
+    </form>
     <div class="split-screen">
       <div class="pleft">
         <div class="pcard">

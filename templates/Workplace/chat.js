@@ -48,11 +48,14 @@ socket.on("newMessage", function (messageSet) {
 
 socket.on("poll_message", function (poll_message) {
   var test1 = poll_message["poll_message"]
+  console.log("TEST1")
   console.log(test1);
+
   var idea_input = test1["idea_input"]
   //console.log("Idea "+idea_input)
+  var color = test1["color"]
 
-  newElement_create(idea_input)
+  newElement_create(idea_input, color)
 
 });
 
@@ -260,11 +263,12 @@ function newElement() {
       question_input: question,
       idea_input: idea,
       workplaceCode: thisWorkplaceCode,
+      color: color,
     })
   );
 }
 
-function newElement_create(inputValue) {
+function newElement_create(inputValue, color) {
   const list = document.createElement("li");
   const option = document.createElement("div");
   const percentBar = document.createElement("div");
@@ -281,7 +285,8 @@ function newElement_create(inputValue) {
   option.setAttribute("id", inputValue + "Button");
 
   //The line below will cause some errors, no color now but will fix it later
-  //option.setAttribute("style", `background-color: ${color}`);
+  // Should work now -Matthew
+  option.setAttribute("style", `background-color: ${color}`);
 
   percentBar.setAttribute("id", inputValue);
   percentBar.setAttribute("class", "percentBar");
@@ -314,12 +319,24 @@ function newElement_create(inputValue) {
 }
 
 function userColor() {
-    let maxVal = 0xFFFFFF; // 16777215
-    let randomNumber = Math.random() * maxVal; 
-    randomNumber = Math.floor(randomNumber);
-    randomNumber = randomNumber.toString(16);
-    let randColor = randomNumber.padStart(6, 0);   
-    return `#${randColor.toUpperCase()}`
+    hsl = "hsl(" + 360 * Math.random() + ',' +
+             (25 + 70 * Math.random()) + '%,' + 
+             (85 + 10 * Math.random()) + '%)'
+    hex = hslToHex(360 * Math.random(), 25 + 70 * Math.random(), 85 + 10 * Math.random())
+    return hex
+}
+
+// Convert hsl to hex color
+//https://stackoverflow.com/a/44134328
+function hslToHex(h, s, l) {
+  l /= 100;
+  const a = s * Math.min(l, 1 - l) / 100;
+  const f = n => {
+    const k = (n + h / 30) % 12;
+    const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+    return Math.round(255 * color).toString(16).padStart(2, '0');   // convert to Hex and prefix "0" if needed
+  };
+  return `#${f(0)}${f(8)}${f(4)}`;
 }
 
 function addColor() {

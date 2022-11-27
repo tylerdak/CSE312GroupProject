@@ -316,6 +316,12 @@ def showProfile(username):
         return redirect("/")
     outerInjected = Templating.injectHTMLBody(srcFile="./templates/Profile/profile.html")
     withUsername= replacePlaceholder(outerInjected, "username", username)
+    
+    testuser = AuthToken.getUsernameFromAuthToken(authToken)
+    if username == testuser:
+        withType= replacePlaceholder(withUsername, "type", "submit")
+    else:
+        withType= replacePlaceholder(withUsername, "type", "hidden")
 
     userCreatedWorkspaces = workplaces.find({"userID":username})
     response = ""
@@ -328,7 +334,21 @@ def showProfile(username):
         response += withCode
 
 
-    return replacePlaceholder(withUsername, placeholder="listNameCreate",newContent=response)
+    return replacePlaceholder(withType, placeholder="listNameCreate",newContent=response)
+
+@app.route("/changename/", methods=['POST'])
+def update_name():
+    authToken = request.cookies.get("auth")
+    if not AuthToken.validAuthToken(authCookie=authToken):
+        return redirect("/")
+    userID = AuthToken.getUsernameFromAuthToken(authToken=authToken)
+    newID = request.form['username']
+    newID = escape(newID)
+
+    authTokens.update_many({'owner': userID}, {'$set': {'owner': newID}})
+    workplaces.update_many({'userID': userID}, {'$set': {'userID': newID}})
+    users.update_many({'username': userID}, {'$set': {'username': newID}})
+    return redirect(url_for('showProfile',username=newID))
 
 @app.route("/usercolor/<code>/", methods=['POST'])
 def testusercolor(code):
@@ -378,8 +398,10 @@ def handle_unnamed_message(message):
         question_input = escaped_message.split(",")[0][19:-1]
         idea_input = escaped_message.split(",")[1][14:-1]
         workplace_code = escaped_message.split(",")[2][17:-2]
+        print(escaped_message.split(",")[3][9:-2])
+        user_color = escaped_message.split(",")[3][9:-2]
 
-        poll_message = {"question_input": question_input, "idea_input": idea_input, "workplace_code_1": workplace_code}
+        poll_message = {"question_input": question_input, "idea_input": idea_input, "workplace_code_1": workplace_code, "color": user_color}
         new_message_list = [poll_message]
         socketio.emit('poll_message', {'poll_message': poll_message}, to=workplace_code)
 
