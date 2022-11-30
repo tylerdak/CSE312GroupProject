@@ -308,6 +308,15 @@ def scriptRetrieval(scriptname):
             content = open('./templates/Workplace/chat.js','rb').read()
     return content, 200, {'Content-Type':'text/js'}
 
+@app.route("/myprofile", methods=['GET'])
+def goToMyProfile():
+    authToken = request.cookies.get("auth")
+    if not AuthToken.validAuthToken(authCookie=authToken):
+        return redirect("/")
+
+    yourUsername = AuthToken.getUsernameFromAuthToken(authToken)
+    return redirect(f"/user/{yourUsername}/")
+
 @app.route("/user/<username>/", methods=['GET'])
 def showProfile(username):
     # Need change: hardcode username, listNameCreate, ListNameJoin
