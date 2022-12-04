@@ -378,3 +378,7 @@ function getColor() {
   }
   xhr.send();
 }
+
+function enterProfile(user) {
+  window.location.replace("/user/" + user +"/");
+}

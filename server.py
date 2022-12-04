@@ -104,7 +104,7 @@ def open_workplace(code):
     chatGet = workplace.get("chat")
     if chatGet != None:
         chat = chatGet
-        
+
     usersArray = "["
     messagesArray = "["
     if chat != []:
@@ -116,14 +116,25 @@ def open_workplace(code):
         messagesArray = messagesArray[:-2]
     usersArray += "]"
     messagesArray += "]"
-    print(usersArray)
-    print(messagesArray)
+
+    wpUsers = []
+    usersGet = workplace.get("users")
+    if usersGet != None:
+        wpUsers = usersGet
+    wpUsersArray = "["
+    if wpUsers != []:
+        for i in range(len(wpUsers)):
+            wpUsersArray += "\""+ wpUsers[i]+"\", "
+        wpUsersArray = wpUsersArray[:-2]
+    wpUsersArray += "]"
+
     outerInjected = Templating.injectHTMLBody(srcFile="./templates/Workplace/workplace.html")
     withName = replacePlaceholder(outerInjected, placeholder="name", newContent=workplace.get("workplace"))
     withCode = replacePlaceholder(withName, placeholder="code", newContent=code)
     withUsers = replacePlaceholder(withCode, placeholder="users", newContent=usersArray)
     withMessages = replacePlaceholder(withUsers, placeholder="messages", newContent=messagesArray)
-    return withMessages, 200, {'Content-Type': 'text/html'}
+    withWpUsers = replacePlaceholder(withMessages, placeholder="workplaceusers", newContent=wpUsersArray)
+    return withWpUsers, 200, {'Content-Type': 'text/html'}
 
 @app.route("/getstarted/", methods=['GET'])
 def getStarted():
@@ -150,8 +161,7 @@ def create_workplace():
     joinCode = ''.join(random.choices(string.ascii_uppercase +
                              string.digits, k=20))
 
-    
-    workplaces.insert_one({"userID": userID, "workplace": workplaceName, "code": joinCode, "chat": []})
+    workplaces.insert_one({"userID": userID, "workplace": workplaceName, "code": joinCode, "chat": [], "users": [userID]})
     return redirect(url_for('open_workplace',code=joinCode))
 
 @app.route("/getstarted/join/submit/", methods=['POST'])
@@ -169,6 +179,15 @@ def join_workplace():
     workplaceName = ""
     for each in workplace2:
         workplaceName = each.get("workplace")
+        usersArr = each.get("users")
+    resultingUsername = AuthToken.getUsernameFromAuthToken(authToken)
+    alreadyJoined = False
+    for each in usersArr:
+        if each == resultingUsername:
+            alreadyJoined = True
+    if(alreadyJoined == False):
+        usersArr.append(resultingUsername)
+        workplaces.update_one({'code': joinCode}, {'$set': {'users': usersArr}})
     return redirect(url_for('open_workplace', code=joinCode))
 
 def makeMessage(username: str, message: str, code: str):
@@ -352,12 +371,28 @@ def update_name():
         return redirect("/")
     userID = AuthToken.getUsernameFromAuthToken(authToken=authToken)
     newID = request.form['username']
+    validUsername = verify.validate.verify_username(newID)
     newID = escape(newID)
+    
+    if validUsername:
+        authTokens.update_many({'owner': userID}, {'$set': {'owner': newID}})
+        workplaces.update_many({'userID': userID}, {'$set': {'userID': newID}})
+        users.update_many({'username': userID}, {'$set': {'username': newID}})
+        allWorkplaces = workplaces.find()
+        for each in allWorkplaces:
+            usersArr = each.get("users")
+            code = each.get("code")
+            x=0
+            for x in range(len(usersArr)):
+                if usersArr[x] == userID:
+                    usersArr[x] = newID
+                    break
 
-    authTokens.update_many({'owner': userID}, {'$set': {'owner': newID}})
-    workplaces.update_many({'userID': userID}, {'$set': {'userID': newID}})
-    users.update_many({'username': userID}, {'$set': {'username': newID}})
-    return redirect(url_for('showProfile',username=newID))
+            workplaces.update_one({'code': code}, {'$set': {'users': usersArr}})
+        return redirect(url_for('showProfile',username=newID))
+    else:
+        print("invalid username")
+        return redirect(url_for('showProfile',username=userID))
 
 @app.route("/usercolor/<code>/", methods=['POST'])
 def testusercolor(code):
