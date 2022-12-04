@@ -232,6 +232,17 @@ ul li {
   top: 0;
   /* padding: 10px 10px 10px 10px; */
 }
+.wcard {
+  border-radius: 10px;
+  box-shadow: 0 8px 16px 0 rgba(148, 148, 148, 0.2);
+  /* padding: 50px; */
+  background-color: white;
+  font-family: "Raleway", sans-serif;
+  width: 160px;
+  margin-top: 50px;
+  margin-left: 10px;
+  padding: 8px;
+}
 
 .header:after {
   content: "";
