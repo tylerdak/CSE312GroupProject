@@ -443,12 +443,14 @@ def handle_unnamed_message(message):
     if "question_input" and "idea_input" in message:
         question_input = escaped_message.split(",")[0][19:-1]
         idea_input = escaped_message.split(",")[1][14:-1]
-        workplace_code = escaped_message.split(",")[2][17:-2]
+        workplace_code = escaped_message.split(",")[2][17:-1]
+        print(workplace_code)
         print(escaped_message.split(",")[3][9:-2])
         user_color = escaped_message.split(",")[3][9:-2]
 
         poll_message = {"question_input": question_input, "idea_input": idea_input, "workplace_code_1": workplace_code, "color": user_color}
         new_message_list = [poll_message]
+        
         socketio.emit('poll_message', {'poll_message': poll_message}, to=workplace_code)
 
     elif "options_server" and "totalVotes_server" in message:
