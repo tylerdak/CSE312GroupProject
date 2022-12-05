@@ -8,24 +8,22 @@
 		<link rel="stylesheet" href="/styles/modal" />
 		<div id="joinModalContent" class="modal-content">
 		  <span id="joinModalClose", class="close">&times;</span>
-		  <form 
-		  	action="/getstarted/join/submit"
-          	id="joinModalForm"
-          	method="post"
-          	enctype="multipart/form-data"
-          >
-		  <div class="input-container joinCode">
-            <label for="joinCodeForm">Join Code:</label>
-            <input
-              id="joinCodeForm"
-              type="text"
-              name="Join Code"
-              placeholder="WRK247"
-            />
-          </div>
-		  <input class="submissionButton" type="submit" value="Join" />
-		  </form>
+		  <h1>Workplaces</h1>
+		  <div id="workplaceslist">
+			
+		  </div>
 		</div>
+			<script>
+				const workplaces = {{workplaces}};
+				const owners = {{owners}};
+				const codes = {{codes}};
+				
+				let text2 = "";
+				for (let i = 0; i < workplaces.length; i++) {
+					text2 += "<div class=\"workplaceList\"><span>Workplace: "+workplaces[i]+"</span><br><span>Owner: "+owners[i]+"</span><br><span class=\"joinClick\" onclick=\"enterWorkplace('"+codes[i]+"')\" style=\"cursor: pointer;\">JOIN</span><br></div>"
+				}
+				document.getElementById("workplaceslist").innerHTML = text2;
+			</script>
 	</div>
 
 	<div id="createModal" class="modal">

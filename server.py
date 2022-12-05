@@ -93,12 +93,22 @@ def login():
 
 @app.route("/workplace/<code>/", methods=['GET'])
 def open_workplace(code):
-    
-    if not AuthToken.validAuthToken(authCookie=request.cookies.get("auth")):
+    authToken = request.cookies.get("auth")
+    if not AuthToken.validAuthToken(authCookie=authToken):
         return redirect("/")
 
     # Temporary workplace backend. Just finds workplace in database
     workplace = workplaces.find_one({"code": code})
+
+    usersArr = workplace.get("users")
+    resultingUsername = AuthToken.getUsernameFromAuthToken(authToken)
+    alreadyJoined = False
+    for each in usersArr:
+        if each == resultingUsername:
+            alreadyJoined = True
+    if(alreadyJoined == False):
+        usersArr.append(resultingUsername)
+        workplaces.update_one({'code': code}, {'$set': {'users': usersArr}})
 
     chat = []
     chatGet = workplace.get("chat")
@@ -142,9 +152,34 @@ def getStarted():
     if not AuthToken.validAuthToken(authCookie=cookies.get("auth")):
         return redirect("/")
     
-    renderedLogin = Templating.injectHTMLBody(srcFile="templates/JoinCreate/joincreate.html")
+    workplace = workplaces.find()
+    wps = []
+    owners = []
+    codes = []
+    for each in workplace:
+        wps.append(each.get("workplace"))
+        owners.append(each.get("userID"))
+        codes.append(each.get("code"))
 
-    return renderedLogin
+    workplacearray = "["
+    ownersarray = "["
+    codesarray = "["
+    if wps != []:
+        for i in range(len(wps)):
+            workplacearray += "\""+ wps[i]+"\", "
+            ownersarray += "\""+ owners[i]+"\", "
+            codesarray += "\""+ codes[i]+"\", "
+        workplacearray = workplacearray[:-2]
+        ownersarray = ownersarray[:-2]
+        codesarray = codesarray[:-2]
+    workplacearray += "]"
+    ownersarray += "]"
+    codesarray += "]"
+    renderedLogin = Templating.injectHTMLBody(srcFile="templates/JoinCreate/joincreate.html")
+    withWorkplaces = replacePlaceholder(renderedLogin, placeholder="workplaces", newContent=workplacearray)
+    withOwners = replacePlaceholder(withWorkplaces, placeholder="owners", newContent=ownersarray)
+    withCodes = replacePlaceholder(withOwners, placeholder="codes", newContent=codesarray)
+    return withCodes
 
 @app.route("/getstarted/create/submit/", methods=['POST'])
 def create_workplace():

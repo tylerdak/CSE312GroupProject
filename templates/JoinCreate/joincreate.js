@@ -40,3 +40,7 @@ window.onclick = function(event) {
   	createModal.style.display = "none";
   }
 }
+
+function enterWorkplace(code) {
+  window.location.replace("/workplace/" + code);
+}
