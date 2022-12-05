@@ -252,7 +252,9 @@ def successfulLoginResponse(forUsername: str):
     })
     
     response = make_response(redirect("/getstarted"))
-    response.set_cookie('auth', authTokenSet.raw)
+    expirationDays = 30
+    expSec = expirationDays * 24 * 60 * 60
+    response.set_cookie('auth', authTokenSet.raw, maxage=expSec, httpOnly=True)
     return response
 
 @app.route('/login/', methods=['POST'])
