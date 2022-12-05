@@ -92,7 +92,14 @@ socket.on("result_message", function (result_message) {
 
 
 const thisPath = window.location.pathname;
-const thisWorkplaceCode = thisPath.split("/").pop();
+var splitPath = thisPath.split("/");
+var thisWorkplaceCode = splitPath.pop();
+console.log(thisWorkplaceCode)
+while (thisWorkplaceCode.strip() == "") {
+  thisWorkplaceCode = splitPath.pop()
+}
+
+
 
 // Tyler
 // Sends JSON data to websocket
