@@ -5,4 +5,4 @@ bs4
 # dnspython
 flask-socketio 
 eventlet
-dateutil
+python-dateutil
