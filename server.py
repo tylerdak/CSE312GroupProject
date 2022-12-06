@@ -144,7 +144,20 @@ def open_workplace(code):
     withUsers = replacePlaceholder(withCode, placeholder="users", newContent=usersArray)
     withMessages = replacePlaceholder(withUsers, placeholder="messages", newContent=messagesArray)
     withWpUsers = replacePlaceholder(withMessages, placeholder="workplaceusers", newContent=wpUsersArray)
-    return withWpUsers, 200, {'Content-Type': 'text/html'}
+    withSendQuestionInput = None
+    withSendQuestionButton = None
+
+    username = AuthToken.getUsernameFromAuthToken(authToken=request.cookies.get("auth"))
+    if username == workplace["userID"]:
+        withSendQuestionInput = replacePlaceholder(withWpUsers, placeholder="sendQuestionInput", newContent='<input type="text" id="questionInput" placeholder="Type question here..." />')
+        withSendQuestionButton = replacePlaceholder(withSendQuestionInput, placeholder="sendQuestion", newContent='<span onclick="sendQuestion();" class="addBtn">Submit</span>')
+    else:
+        withSendQuestionInput = replacePlaceholder(withWpUsers, placeholder="sendQuestionInput", newContent='<input type="text" id="questionInput" placeholder="Waiting for question" disabled/>')
+        withSendQuestionButton = replacePlaceholder(withSendQuestionInput, placeholder="sendQuestion", newContent='')
+
+    print("RQUEST.cookies", request.cookies)
+
+    return withSendQuestionButton, 200, {'Content-Type': 'text/html'}
 
 @app.route("/getstarted/", methods=['GET'])
 def getStarted():
@@ -498,6 +511,10 @@ def handle_unnamed_message(message):
         # print("options_server", options_server)
         # print("totalVotes_server", total_votes_server)
         # print("workplace_code", workplace_code)
+
+    elif "updatedQuestion" in message:
+        jsonformat = json.loads(escaped_message)
+        socketio.emit('updatedQuestion', {'updatedQuestion': jsonformat["updatedQuestion"]}, to=jsonformat["workplaceCode"])
 
     else:
         

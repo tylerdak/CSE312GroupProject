@@ -33,6 +33,7 @@ function addMessagesToChat(messages) {
 
 // Establish a WebSocket connection with the server
 var socket = io(); // new WebSocket("ws://" + window.location.host + "/websocket");
+
 socket.on("connect", function () {
   socket.emit("initialDataRequest", {
     code: thisWorkplaceCode,
@@ -84,6 +85,11 @@ socket.on("result_message", function (result_message) {
     }
   }
   //handleOptions(options)
+});
+
+socket.on("updatedQuestion", function (updatedQuestion) {
+  document.getElementById("questionInput").value =
+    updatedQuestion["updatedQuestion"];
 });
 
 const thisPath = window.location.pathname;
@@ -232,6 +238,17 @@ function handleOptions(option) {
   );
 
   console.log("total", totalVotes);
+}
+
+// Send updated question to websocket
+function sendQuestion() {
+  const updatedQuestion = document.getElementById("questionInput").value;
+  socket.send(
+    JSON.stringify({
+      updatedQuestion: updatedQuestion,
+      workplaceCode: thisWorkplaceCode,
+    })
+  );
 }
 
 // Create a new list item when clicking on the "Add" button

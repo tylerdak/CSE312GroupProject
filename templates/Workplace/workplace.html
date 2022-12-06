@@ -112,7 +112,10 @@
       <p>Join Code: {{code}}</p>
     <div id="myDIV" style="margin: 5px" class="header">
       <h2  hidden>Problem {{problemNumber}}</h2>
-      <input type="text" id="questionInput" placeholder="Type question here..." />
+      {{sendQuestionInput}}
+      <!-- <input type="text" id="questionInput" placeholder="Type question here..." /> -->
+      {{sendQuestion}}
+      <!-- <span onclick="sendQuestion();" class="addBtn">Submit</span> -->
       <input type="text" id="myInput" placeholder="Type your idea here..." />
       <span onclick="newElement();" class="addBtn">Add</span>
     </div>
