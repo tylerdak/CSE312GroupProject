@@ -25,13 +25,26 @@
       <h4> Online </h4>
       <p id="workplaceUsers">
         <script>
-          const workplaceusers = {{workplaceusers}};
-          
-          let text2 = "";
-          for (let i = 0; i < workplaceusers.length; i++) {
-            text2 += "<span onclick=\"enterProfile('"+workplaceusers[i]+"')\" style=\"cursor: pointer;\">"+workplaceusers[i]+"</span><br>"
-          }
-          document.getElementById("workplaceUsers").innerHTML = text2;
+          var socket = io();
+          var allLiveUsers = []
+          // For all users except the user who joins the room
+          socket.on("allUsers", function (allUsers) {
+            allLiveUsers = allUsers["allUsers"]
+            let text2 = "";
+            for (let i = 0; i < allLiveUsers.length; i++) {
+              text2 += "<span onclick=\"enterProfile('"+allLiveUsers[i]+"')\" style=\"cursor: pointer;\">"+allLiveUsers[i]+"</span><br>"
+            }
+            document.getElementById("workplaceUsers").innerHTML = text2;
+          });
+
+          // For the user who joins the room
+            const workplaceusers = {{workplaceusers}};
+            let text2 = "";
+            for (let i = 0; i < workplaceusers.length; i++) {
+              text2 += "<span onclick=\"enterProfile('"+workplaceusers[i]+"')\" style=\"cursor: pointer;\">"+workplaceusers[i]+"</span><br>"
+            }
+            document.getElementById("workplaceUsers").innerHTML = text2;
+
         </script>
       </p>
     </div>
