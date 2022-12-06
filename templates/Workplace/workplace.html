@@ -26,21 +26,21 @@
       <p id="workplaceUsers">
         <script>
           var socket = io();
-          var allLiveUsers = []
-          // For all users except the user who joins the room
-          socket.on("allUsers", function (allUsers) {
-            allLiveUsers = allUsers["allUsers"]
-            let text2 = "";
-            for (let i = 0; i < allLiveUsers.length; i++) {
-              text2 += "<span onclick=\"enterProfile('"+allLiveUsers[i]+"')\" style=\"cursor: pointer;\">"+allLiveUsers[i]+"</span><br>"
-            }
-            document.getElementById("workplaceUsers").innerHTML = text2;
-          });
-
-          // For the user who joins the room
             const workplaceusers = {{workplaceusers}};
+
+            var workspaceCode = workplaceusers[workplaceusers.length - 1]
+            console.log("workspaceCode " + workspaceCode)
+
+            socket.send(
+              JSON.stringify({
+                allUsers: workplaceusers,
+                workplaceCode: workspaceCode
+              })
+            );
+
+            // For the user who joins the room
             let text2 = "";
-            for (let i = 0; i < workplaceusers.length; i++) {
+            for (let i = 0; i < workplaceusers.length - 1; i++) {
               text2 += "<span onclick=\"enterProfile('"+workplaceusers[i]+"')\" style=\"cursor: pointer;\">"+workplaceusers[i]+"</span><br>"
             }
             document.getElementById("workplaceUsers").innerHTML = text2;

@@ -48,7 +48,6 @@ socket.on("newMessage", function (messageSet) {
 
 socket.on("poll_message", function (poll_message) {
   var test1 = poll_message["poll_message"];
-  console.log("TEST1");
   console.log(test1);
 
   var idea_input = test1["idea_input"];
@@ -57,6 +56,18 @@ socket.on("poll_message", function (poll_message) {
 
   newElement_create(idea_input, color);
 });
+
+socket.on("allUsers", function (allUsers) {
+  var workplaceusers = allUsers["allUsers"];
+  console.log("workplaceusers" + workplaceusers);
+
+    let text2 = "";
+    for (let i = 0; i < workplaceusers.length - 1; i++) {
+      text2 += "<span onclick=\"enterProfile('"+workplaceusers[i]+"')\" style=\"cursor: pointer;\">"+workplaceusers[i]+"</span><br>"
+    }
+    document.getElementById("workplaceUsers").innerHTML = text2;
+});
+
 
 socket.on("result_message", function (result_message) {
   var result_message = result_message["result_message"];
