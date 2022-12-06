@@ -15,7 +15,7 @@ from templating import Templating
 import verify
 
 from Private import flask_secret_key
-from crypt import PassMan, AuthTokenPair, AuthToken
+from cryptStuff import PassMan, AuthTokenPair, AuthToken
 import json
 import htmlElements
 # from numpy import place
