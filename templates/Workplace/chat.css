@@ -1,3 +1,7 @@
+:root {
+  font-family: "Raleway";
+}
+
 .chat-bar-collapsible {
   position: fixed;
   bottom: 0;
@@ -287,4 +291,42 @@ li.selected {
 .brainstorm {
   margin-left: 400px;
   margin-right: 100px;
+}
+
+.expiredTimer {
+  padding: 10px;
+  width: 15%;
+  background: #ff5555;
+  color: #8a0000;
+  font-weight: bold;
+  float: left;
+  text-align: center;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.3s;
+  border-radius: 0;
+}
+
+.runningTimer {
+  padding: 10px;
+  width: 15%;
+  background: #77ff77;
+  color: #008a00;
+  font-weight: bold;
+  float: left;
+  text-align: center;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.3s;
+  border-radius: 0;
+}
+
+.expiredTimer:hover {
+  background-color: #ff0000;
+  color: white;
+}
+
+.runningTimer:hover {
+  background-color: #00ff00;
+  color: black;
 }

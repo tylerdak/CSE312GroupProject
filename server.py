@@ -156,7 +156,7 @@ def open_workplace(code):
         withSendQuestionButton = replacePlaceholder(withSendQuestionInput, placeholder="sendQuestion", newContent='<span onclick="sendQuestion();" class="addBtn">Submit</span>')
     else:
         withSendQuestionInput = replacePlaceholder(withWpUsers, placeholder="sendQuestionInput", newContent='<input type="text" id="questionInput" placeholder="Waiting for question" disabled/>')
-        withSendQuestionButton = replacePlaceholder(withSendQuestionInput, placeholder="sendQuestion", newContent='')
+        withSendQuestionButton = replacePlaceholder(withSendQuestionInput, placeholder="sendQuestion", newContent='<span onload="startTimer();" class="expiredTimer" id="timerThing">EXPIRED</span>')
 
     print("RQUEST.cookies", request.cookies)
 
@@ -488,9 +488,14 @@ def initialSend(data):
         broadcastNewMessage([makeMessage("SERVER", f"{username} entered the room.", room)], code=room)
 
         wp = workplaces.find_one({"code":room})
-        question = wp["currentQuestion"]
-        timestamp = wp["questionExpiry"]
+        question = wp.get("currentQuestion")
+        timestamp = wp.get("questionExpiry")
 
+        if timestamp is None:
+            timestamp = datetime.datetime.fromtimestamp(1.0)
+            print(timestamp)
+        if question is None:
+            question = "Waiting for question..."
 
         socketio.emit('dataDebrief', {'question':question,'timestamp':timestamp,'answers':"none"})
 

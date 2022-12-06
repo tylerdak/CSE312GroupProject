@@ -87,10 +87,51 @@ socket.on("result_message", function (result_message) {
   //handleOptions(options)
 });
 
+var currentTimestamp = '1980-12-05 23:14:02.338718'
+
+// Source: https://www.w3schools.com/howto/howto_js_countdown.asp
+// With some slight modifications for this specific implementation, of course
+var x = setInterval(function() {
+  // today
+  var now = new Date().getTime();
+  var soon = new Date(currentTimestamp).getDate()
+
+  var diff = soon - now;
+  
+  var minutes = Math.floor(diff / (1000 * 60));
+  var seconds = Math.floor(diff % (1000*60) / 1000);
+  
+  document.getElementById("timerThing").innerHTML = minutes + ":" + seconds
+  
+  if (diff < 0) {
+    document.getElementById("timerThing").classList.remove("runningTimer"); 
+    document.getElementById("timerThing").classList.add("expiredTimer")
+    document.getElementById("timerThing").innerHTML = "EXPIRED"
+
+    clearInterval(x)
+  }
+  else {
+   document.getElementById("timerThing").classList.remove("expiredTimer")   
+    document.getElementById("timerThing").classList.add("runningTimer")
+  }
+}, 1000);
+
+function setNewQuestion(question) {
+  document.getElementById("questionInput").value = question
+}
+
 socket.on("updatedQuestion", function (updatedQuestion) {
-  document.getElementById("questionInput").value =
-    updatedQuestion["updatedQuestion"];
+    setNewQuestion(updatedQuestion["updatedQuestion"]);
+  
+  currentTimestamp = updatedQuestion["timestamp"]
+  x()
 });
+
+socket.on("dataDebrief", function (data) {
+  question = data["question"]
+  setNewQuestion(question)
+  currentTimestamp = data["timestamp"]
+})
 
 const thisPath = window.location.pathname;
 var splitPath = thisPath.split("/");
@@ -247,6 +288,7 @@ function sendQuestion() {
     JSON.stringify({
       updatedQuestion: updatedQuestion,
       workplaceCode: thisWorkplaceCode,
+      questionExpirySeconds: 60.0
     })
   );
 }

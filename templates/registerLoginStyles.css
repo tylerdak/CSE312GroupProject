@@ -27,10 +27,17 @@ a:hover {
 } */
 .split-screen {
   display: flex;
-  flex-direction: column;
+  flex-direction: column-reverse;
 }
+
+.biglogo {
+  max-width: 100%;
+  height: auto;
+}
+
 .left {
-  height: 800px;
+  max-width: 100%;
+  height: auto;
   margin: 10px;
 }
 .left,
