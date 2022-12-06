@@ -139,6 +139,8 @@ def open_workplace(code):
         wpUsersArray = wpUsersArray[:-2]
     wpUsersArray += "]"
 
+    socketio.emit('allUsers', {'allUsers': wpUsers}, to=code)
+
     outerInjected = Templating.injectHTMLBody(srcFile="./templates/Workplace/workplace.html")
     withName = replacePlaceholder(outerInjected, placeholder="name", newContent=workplace.get("workplace"))
     withCode = replacePlaceholder(withName, placeholder="code", newContent=code)
