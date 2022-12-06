@@ -103,9 +103,10 @@ def open_workplace(code):
     usersArr = workplace.get("users")
     resultingUsername = AuthToken.getUsernameFromAuthToken(authToken)
     alreadyJoined = False
-    for each in usersArr:
-        if each == resultingUsername:
-            alreadyJoined = True
+    if usersArr is not None and resultingUsername in usersArr:
+        alreadyJoined = True
+    elif usersArr is None:
+        usersArr = []
     if(alreadyJoined == False):
         usersArr.append(resultingUsername)
         workplaces.update_one({'code': code}, {'$set': {'users': usersArr}})
@@ -225,16 +226,17 @@ def join_workplace():
     if workplace == None:
         return redirect("/getstarted")
 
-    workplace2 = workplaces.find({"code": joinCode})
+    workplace2 = workplaces.find_one({"code": joinCode})
     workplaceName = ""
     for each in workplace2:
         workplaceName = each.get("workplace")
         usersArr = each.get("users")
     resultingUsername = AuthToken.getUsernameFromAuthToken(authToken)
     alreadyJoined = False
-    for each in usersArr:
-        if each == resultingUsername:
-            alreadyJoined = True
+    if usersArr is not None and resultingUsername in usersArr:
+        alreadyJoined = True
+    elif usersArr is None:
+        usersArr = []
     if(alreadyJoined == False):
         usersArr.append(resultingUsername)
         workplaces.update_one({'code': joinCode}, {'$set': {'users': usersArr}})
@@ -516,8 +518,17 @@ def handle_unnamed_message(message):
 
     elif "updatedQuestion" in message:
         jsonformat = json.loads(escaped_message)
-        socketio.emit('updatedQuestion', {'updatedQuestion': jsonformat["updatedQuestion"]}, to=jsonformat["workplaceCode"])
 
+        print(jsonformat)
+
+        allegedAuth = request.cookies.get("auth")
+        if AuthToken.validAuthToken(allegedAuth):
+            user = AuthToken.getUsernameFromAuthToken(allegedAuth)
+            workplace = workplaces.find_one({"code":jsonformat["workplaceCode"]})
+            if user == workplace["userID"]:
+                socketio.emit('updatedQuestion', {'updatedQuestion': jsonformat["updatedQuestion"]}, to=jsonformat["workplaceCode"])
+            else:
+                print(f"A user by the name of {user} just tried to make an unauthenticated questionChange!!")
     else:
         
         print(f"handle_message: {str(message)}")

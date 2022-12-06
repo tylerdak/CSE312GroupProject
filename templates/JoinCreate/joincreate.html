@@ -13,17 +13,17 @@
 			
 		  </div>
 		</div>
-			<script>
-				const workplaces = {{workplaces}};
-				const owners = {{owners}};
-				const codes = {{codes}};
-				
-				let text2 = "";
-				for (let i = 0; i < workplaces.length; i++) {
-					text2 += "<div class=\"workplaceList\"><span>Workplace: "+workplaces[i]+"</span><br><span>Owner: "+owners[i]+"</span><br><span class=\"joinClick\" onclick=\"enterWorkplace('"+codes[i]+"')\" style=\"cursor: pointer;\">JOIN</span><br></div>"
-				}
-				document.getElementById("workplaceslist").innerHTML = text2;
-			</script>
+		<script>
+			const workplaces = {{workplaces}};
+			const owners = {{owners}};
+			const codes = {{codes}};
+			
+			let text2 = "";
+			for (let i = 0; i < workplaces.length; i++) {
+				text2 += "<div class=\"workplaceList\"><span>Workplace: "+workplaces[i]+"</span><br><span>Owner: "+owners[i]+"</span><br><span class=\"joinClick\" onclick=\"enterWorkplace('"+codes[i]+"')\" style=\"cursor: pointer;\">JOIN</span><br></div>"
+			}
+			document.getElementById("workplaceslist").innerHTML = text2;
+		</script>
 	</div>
 
 	<div id="createModal" class="modal">
