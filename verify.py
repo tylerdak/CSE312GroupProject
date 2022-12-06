@@ -63,6 +63,18 @@ class process:
         options_server = ast.literal_eval(options_pre)
         return_value = [options_server, total_votes_server, workplace_code]
         return return_value
+    def process_users(input:str):
+        delimiter_1 = '"allUsers":'
+        delimiter_2 = ',"workplaceCode":"'
+
+        data_index_1 = input.find(delimiter_1)
+        data_index_2 = input.find(delimiter_2)
+
+        users_pre = input[data_index_1 + len(delimiter_1):data_index_2]
+        users = ast.literal_eval(users_pre)
+        workspace_code = input[data_index_2 + len(delimiter_2):-2]
+        return [users, workspace_code]
+
 
 
 # For testing purpose

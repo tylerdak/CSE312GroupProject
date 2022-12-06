@@ -139,9 +139,9 @@ def open_workplace(code):
         for i in range(len(wpUsers)):
             wpUsersArray += "\""+ wpUsers[i]+"\", "
         wpUsersArray = wpUsersArray[:-2]
-    wpUsersArray += "]"
 
-    socketio.emit('allUsers', {'allUsers': wpUsers}, code=code)
+        wpUsersArray += ", \"" + code +"\""
+    wpUsersArray += "]"
 
     outerInjected = Templating.injectHTMLBody(srcFile="./templates/Workplace/workplace.html")
     withName = replacePlaceholder(outerInjected, placeholder="name", newContent=workplace.get("workplace"))
@@ -149,6 +149,7 @@ def open_workplace(code):
     withUsers = replacePlaceholder(withCode, placeholder="users", newContent=usersArray)
     withMessages = replacePlaceholder(withUsers, placeholder="messages", newContent=messagesArray)
     withWpUsers = replacePlaceholder(withMessages, placeholder="workplaceusers", newContent=wpUsersArray)
+
     withSendQuestionInput = None
     withSendQuestionButton = None
 
@@ -548,6 +549,12 @@ def handle_unnamed_message(message):
         # print("options_server", options_server)
         # print("totalVotes_server", total_votes_server)
         # print("workplace_code", workplace_code)
+    elif "allUsers" in escaped_message:
+        allUsers = verify.process.process_users(escaped_message)[0]
+        workspace_code = verify.process.process_users(escaped_message)[1]
+        result_message = {"allUsers": allUsers}
+        socketio.emit('allUsers', result_message, to=workspace_code)
+
 
     elif "updatedQuestion" in escaped_message:
         jsonformat = json.loads(escaped_message)
