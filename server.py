@@ -10,6 +10,8 @@ import random
 import string
 # Custom Password Manager Class
 
+# parse timestamps back to dates
+import dateutil.parser
 
 from templating import Templating
 import verify
@@ -156,7 +158,7 @@ def open_workplace(code):
         withSendQuestionButton = replacePlaceholder(withSendQuestionInput, placeholder="sendQuestion", newContent='<span onclick="sendQuestion();" class="addBtn">Submit</span>')
     else:
         withSendQuestionInput = replacePlaceholder(withWpUsers, placeholder="sendQuestionInput", newContent='<input type="text" id="questionInput" placeholder="Waiting for question" disabled/>')
-        withSendQuestionButton = replacePlaceholder(withSendQuestionInput, placeholder="sendQuestion", newContent='<span onload="startTimer();" class="expiredTimer" id="timerThing">EXPIRED</span>')
+        withSendQuestionButton = replacePlaceholder(withSendQuestionInput, placeholder="sendQuestion", newContent='<span class="expiredTimer" id="timerThing">EXPIRED</span>')
 
     print("RQUEST.cookies", request.cookies)
 
@@ -512,6 +514,15 @@ def handle_unnamed_message(message):
         print(escaped_message.split(",")[3][9:-2])
         user_color = escaped_message.split(",")[3][9:-2]
 
+        wp = workplaces.find_one({"code":workplace_code})
+        threshold = dateutil.parser.parse(wp["questionExpiry"])
+        actual = datetime.datetime.now()
+        if actual > threshold:
+            print("regect answer for lateness")
+            return
+        else:
+            print("allow") 
+
         poll_message = {"question_input": question_input, "idea_input": idea_input, "workplace_code_1": workplace_code, "color": user_color}
         new_message_list = [poll_message]
         print("poll_message:", poll_message)
@@ -520,6 +531,15 @@ def handle_unnamed_message(message):
     elif "options_server" and "totalVotes_server" in escaped_message:
 
         poll_result = verify.process.process_result(escaped_message)
+
+        wp = workplaces.find_one({"code":poll_result[2]})
+        threshold = dateutil.parser.parse(wp["questionExpiry"])
+        actual = datetime.datetime.now()
+        if actual > threshold:
+            print("regect for lateness")
+            return
+        else:
+            print("allow") 
 
         result_message = {"options_server": poll_result[0], "total_votes_server": poll_result[1], "workplace_code_1": poll_result[2]}
         print("result:", result_message)

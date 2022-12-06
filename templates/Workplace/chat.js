@@ -88,15 +88,20 @@ socket.on("result_message", function (result_message) {
 });
 
 var currentTimestamp = '1980-12-05 23:14:02.338718'
+var x = setInterval(timer, 1000);
+clearInterval(x);
 
 // Source: https://www.w3schools.com/howto/howto_js_countdown.asp
 // With some slight modifications for this specific implementation, of course
-var x = setInterval(function() {
+function timer() {
   // today
   var now = new Date().getTime();
-  var soon = new Date(currentTimestamp).getDate()
+  var soon = new Date(currentTimestamp).getTime()
+  console.log(currentTimestamp)
+  console.log(soon, now)
 
   var diff = soon - now;
+  console.log(diff)
   
   var minutes = Math.floor(diff / (1000 * 60));
   var seconds = Math.floor(diff % (1000*60) / 1000);
@@ -114,23 +119,35 @@ var x = setInterval(function() {
    document.getElementById("timerThing").classList.remove("expiredTimer")   
     document.getElementById("timerThing").classList.add("runningTimer")
   }
-}, 1000);
+}
+
+
+
+
+function startTimer() {
+  x = setInterval(timer, 1000);
+}
 
 function setNewQuestion(question) {
   document.getElementById("questionInput").value = question
 }
 
 socket.on("updatedQuestion", function (updatedQuestion) {
-    setNewQuestion(updatedQuestion["updatedQuestion"]);
+  console.log(updatedQuestion)
+
+  clearInterval(x)
+  setNewQuestion(updatedQuestion["updatedQuestion"]);
   
   currentTimestamp = updatedQuestion["timestamp"]
-  x()
+  startTimer()
 });
 
 socket.on("dataDebrief", function (data) {
+  clearInterval(x)
   question = data["question"]
   setNewQuestion(question)
   currentTimestamp = data["timestamp"]
+  startTimer()
 })
 
 const thisPath = window.location.pathname;
