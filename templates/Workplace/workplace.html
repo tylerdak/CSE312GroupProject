@@ -21,6 +21,20 @@
     /> -->
 
     <!-- CHAT BAR BLOCK -->
+    <div class="wcard">
+      <h4> Online </h4>
+      <p id="workplaceUsers">
+        <script>
+          const workplaceusers = {{workplaceusers}};
+          
+          let text2 = "";
+          for (let i = 0; i < workplaceusers.length; i++) {
+            text2 += "<span onclick=\"enterProfile('"+workplaceusers[i]+"')\" style=\"cursor: pointer;\">"+workplaceusers[i]+"</span><br>"
+          }
+          document.getElementById("workplaceUsers").innerHTML = text2;
+        </script>
+      </p>
+    </div>
     <div class="chat-bar-collapsible">
       <!-- <button id="chat-button" type="button" class="collapsible">
         Chat with us! -->
@@ -98,7 +112,10 @@
       <p>Join Code: {{code}}</p>
     <div id="myDIV" style="margin: 5px" class="header">
       <h2  hidden>Problem {{problemNumber}}</h2>
-      <input type="text" id="questionInput" placeholder="Type question here..." />
+      {{sendQuestionInput}}
+      <!-- <input type="text" id="questionInput" placeholder="Type question here..." /> -->
+      {{sendQuestion}}
+      <!-- <span onclick="sendQuestion();" class="addBtn">Submit</span> -->
       <input type="text" id="myInput" placeholder="Type your idea here..." />
       <span onclick="newElement();" class="addBtn">Add</span>
     </div>

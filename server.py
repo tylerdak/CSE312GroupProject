@@ -93,18 +93,28 @@ def login():
 
 @app.route("/workplace/<code>/", methods=['GET'])
 def open_workplace(code):
-    
-    if not AuthToken.validAuthToken(authCookie=request.cookies.get("auth")):
+    authToken = request.cookies.get("auth")
+    if not AuthToken.validAuthToken(authCookie=authToken):
         return redirect("/")
 
     # Temporary workplace backend. Just finds workplace in database
     workplace = workplaces.find_one({"code": code})
 
+    usersArr = workplace.get("users")
+    resultingUsername = AuthToken.getUsernameFromAuthToken(authToken)
+    alreadyJoined = False
+    for each in usersArr:
+        if each == resultingUsername:
+            alreadyJoined = True
+    if(alreadyJoined == False):
+        usersArr.append(resultingUsername)
+        workplaces.update_one({'code': code}, {'$set': {'users': usersArr}})
+
     chat = []
     chatGet = workplace.get("chat")
     if chatGet != None:
         chat = chatGet
-        
+
     usersArray = "["
     messagesArray = "["
     if chat != []:
@@ -116,14 +126,38 @@ def open_workplace(code):
         messagesArray = messagesArray[:-2]
     usersArray += "]"
     messagesArray += "]"
-    print(usersArray)
-    print(messagesArray)
+
+    wpUsers = []
+    usersGet = workplace.get("users")
+    if usersGet != None:
+        wpUsers = usersGet
+    wpUsersArray = "["
+    if wpUsers != []:
+        for i in range(len(wpUsers)):
+            wpUsersArray += "\""+ wpUsers[i]+"\", "
+        wpUsersArray = wpUsersArray[:-2]
+    wpUsersArray += "]"
+
     outerInjected = Templating.injectHTMLBody(srcFile="./templates/Workplace/workplace.html")
     withName = replacePlaceholder(outerInjected, placeholder="name", newContent=workplace.get("workplace"))
     withCode = replacePlaceholder(withName, placeholder="code", newContent=code)
     withUsers = replacePlaceholder(withCode, placeholder="users", newContent=usersArray)
     withMessages = replacePlaceholder(withUsers, placeholder="messages", newContent=messagesArray)
-    return withMessages, 200, {'Content-Type': 'text/html'}
+    withWpUsers = replacePlaceholder(withMessages, placeholder="workplaceusers", newContent=wpUsersArray)
+    withSendQuestionInput = None
+    withSendQuestionButton = None
+
+    username = AuthToken.getUsernameFromAuthToken(authToken=request.cookies.get("auth"))
+    if username == workplace["userID"]:
+        withSendQuestionInput = replacePlaceholder(withWpUsers, placeholder="sendQuestionInput", newContent='<input type="text" id="questionInput" placeholder="Type question here..." />')
+        withSendQuestionButton = replacePlaceholder(withSendQuestionInput, placeholder="sendQuestion", newContent='<span onclick="sendQuestion();" class="addBtn">Submit</span>')
+    else:
+        withSendQuestionInput = replacePlaceholder(withWpUsers, placeholder="sendQuestionInput", newContent='<input type="text" id="questionInput" placeholder="Waiting for question" disabled/>')
+        withSendQuestionButton = replacePlaceholder(withSendQuestionInput, placeholder="sendQuestion", newContent='')
+
+    print("RQUEST.cookies", request.cookies)
+
+    return withSendQuestionButton, 200, {'Content-Type': 'text/html'}
 
 @app.route("/getstarted/", methods=['GET'])
 def getStarted():
@@ -131,9 +165,34 @@ def getStarted():
     if not AuthToken.validAuthToken(authCookie=cookies.get("auth")):
         return redirect("/")
     
-    renderedLogin = Templating.injectHTMLBody(srcFile="templates/JoinCreate/joincreate.html")
+    workplace = workplaces.find()
+    wps = []
+    owners = []
+    codes = []
+    for each in workplace:
+        wps.append(each.get("workplace"))
+        owners.append(each.get("userID"))
+        codes.append(each.get("code"))
 
-    return renderedLogin
+    workplacearray = "["
+    ownersarray = "["
+    codesarray = "["
+    if wps != []:
+        for i in range(len(wps)):
+            workplacearray += "\""+ wps[i]+"\", "
+            ownersarray += "\""+ owners[i]+"\", "
+            codesarray += "\""+ codes[i]+"\", "
+        workplacearray = workplacearray[:-2]
+        ownersarray = ownersarray[:-2]
+        codesarray = codesarray[:-2]
+    workplacearray += "]"
+    ownersarray += "]"
+    codesarray += "]"
+    renderedLogin = Templating.injectHTMLBody(srcFile="templates/JoinCreate/joincreate.html")
+    withWorkplaces = replacePlaceholder(renderedLogin, placeholder="workplaces", newContent=workplacearray)
+    withOwners = replacePlaceholder(withWorkplaces, placeholder="owners", newContent=ownersarray)
+    withCodes = replacePlaceholder(withOwners, placeholder="codes", newContent=codesarray)
+    return withCodes
 
 @app.route("/getstarted/create/submit/", methods=['POST'])
 def create_workplace():
@@ -150,8 +209,7 @@ def create_workplace():
     joinCode = ''.join(random.choices(string.ascii_uppercase +
                              string.digits, k=20))
 
-    
-    workplaces.insert_one({"userID": userID, "workplace": workplaceName, "code": joinCode, "chat": []})
+    workplaces.insert_one({"userID": userID, "workplace": workplaceName, "code": joinCode, "chat": [], "users": [userID]})
     return redirect(url_for('open_workplace',code=joinCode))
 
 @app.route("/getstarted/join/submit/", methods=['POST'])
@@ -169,6 +227,15 @@ def join_workplace():
     workplaceName = ""
     for each in workplace2:
         workplaceName = each.get("workplace")
+        usersArr = each.get("users")
+    resultingUsername = AuthToken.getUsernameFromAuthToken(authToken)
+    alreadyJoined = False
+    for each in usersArr:
+        if each == resultingUsername:
+            alreadyJoined = True
+    if(alreadyJoined == False):
+        usersArr.append(resultingUsername)
+        workplaces.update_one({'code': joinCode}, {'$set': {'users': usersArr}})
     return redirect(url_for('open_workplace', code=joinCode))
 
 def makeMessage(username: str, message: str, code: str):
@@ -233,7 +300,9 @@ def successfulLoginResponse(forUsername: str):
     })
     
     response = make_response(redirect("/getstarted"))
-    response.set_cookie('auth', authTokenSet.raw)
+    expirationDays = 30
+    expSec = expirationDays * 24 * 60 * 60
+    response.set_cookie('auth', authTokenSet.raw, max_age=expSec)
     return response
 
 @app.route('/login/', methods=['POST'])
@@ -308,6 +377,15 @@ def scriptRetrieval(scriptname):
             content = open('./templates/Workplace/chat.js','rb').read()
     return content, 200, {'Content-Type':'text/js'}
 
+@app.route("/myprofile", methods=['GET'])
+def goToMyProfile():
+    authToken = request.cookies.get("auth")
+    if not AuthToken.validAuthToken(authCookie=authToken):
+        return redirect("/")
+
+    yourUsername = AuthToken.getUsernameFromAuthToken(authToken)
+    return redirect(f"/user/{yourUsername}/")
+
 @app.route("/user/<username>/", methods=['GET'])
 def showProfile(username):
     # Need change: hardcode username, listNameCreate, ListNameJoin
@@ -343,12 +421,28 @@ def update_name():
         return redirect("/")
     userID = AuthToken.getUsernameFromAuthToken(authToken=authToken)
     newID = request.form['username']
+    validUsername = verify.validate.verify_username(newID)
     newID = escape(newID)
+    
+    if validUsername:
+        authTokens.update_many({'owner': userID}, {'$set': {'owner': newID}})
+        workplaces.update_many({'userID': userID}, {'$set': {'userID': newID}})
+        users.update_many({'username': userID}, {'$set': {'username': newID}})
+        allWorkplaces = workplaces.find()
+        for each in allWorkplaces:
+            usersArr = each.get("users")
+            code = each.get("code")
+            x=0
+            for x in range(len(usersArr)):
+                if usersArr[x] == userID:
+                    usersArr[x] = newID
+                    break
 
-    authTokens.update_many({'owner': userID}, {'$set': {'owner': newID}})
-    workplaces.update_many({'userID': userID}, {'$set': {'userID': newID}})
-    users.update_many({'username': userID}, {'$set': {'username': newID}})
-    return redirect(url_for('showProfile',username=newID))
+            workplaces.update_one({'code': code}, {'$set': {'users': usersArr}})
+        return redirect(url_for('showProfile',username=newID))
+    else:
+        print("invalid username")
+        return redirect(url_for('showProfile',username=userID))
 
 @app.route("/usercolor/<code>/", methods=['POST'])
 def testusercolor(code):
@@ -397,12 +491,14 @@ def handle_unnamed_message(message):
     if "question_input" and "idea_input" in message:
         question_input = escaped_message.split(",")[0][19:-1]
         idea_input = escaped_message.split(",")[1][14:-1]
-        workplace_code = escaped_message.split(",")[2][17:-2]
+        workplace_code = escaped_message.split(",")[2][17:-1]
+        print(workplace_code)
         print(escaped_message.split(",")[3][9:-2])
         user_color = escaped_message.split(",")[3][9:-2]
 
         poll_message = {"question_input": question_input, "idea_input": idea_input, "workplace_code_1": workplace_code, "color": user_color}
         new_message_list = [poll_message]
+        
         socketio.emit('poll_message', {'poll_message': poll_message}, to=workplace_code)
 
     elif "options_server" and "totalVotes_server" in message:
@@ -415,6 +511,10 @@ def handle_unnamed_message(message):
         # print("options_server", options_server)
         # print("totalVotes_server", total_votes_server)
         # print("workplace_code", workplace_code)
+
+    elif "updatedQuestion" in message:
+        jsonformat = json.loads(escaped_message)
+        socketio.emit('updatedQuestion', {'updatedQuestion': jsonformat["updatedQuestion"]}, to=jsonformat["workplaceCode"])
 
     else:
         

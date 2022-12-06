@@ -33,6 +33,7 @@ function addMessagesToChat(messages) {
 
 // Establish a WebSocket connection with the server
 var socket = io(); // new WebSocket("ws://" + window.location.host + "/websocket");
+
 socket.on("connect", function () {
   socket.emit("initialDataRequest", {
     code: thisWorkplaceCode,
@@ -45,29 +46,26 @@ socket.on("newMessage", function (messageSet) {
   addMessagesToChat(messageSet["messages"]);
 });
 
-
 socket.on("poll_message", function (poll_message) {
-  var test1 = poll_message["poll_message"]
-  console.log("TEST1")
+  var test1 = poll_message["poll_message"];
+  console.log("TEST1");
   console.log(test1);
 
-  var idea_input = test1["idea_input"]
+  var idea_input = test1["idea_input"];
   //console.log("Idea "+idea_input)
-  var color = test1["color"]
+  var color = test1["color"];
 
-  newElement_create(idea_input, color)
-
+  newElement_create(idea_input, color);
 });
 
-
 socket.on("result_message", function (result_message) {
-  var result_message = result_message["result_message"]
-  var options_server = result_message["options_server"]
-  var total_votes_server = result_message["total_votes_server"]
-  total3 = parseInt(total_votes_server)
+  var result_message = result_message["result_message"];
+  var options_server = result_message["options_server"];
+  var total_votes_server = result_message["total_votes_server"];
+  total3 = parseInt(total_votes_server);
 
-  totalVotes = total3
-  options = options_server
+  totalVotes = total3;
+  options = options_server;
   console.log("totalVotes" + totalVotes);
   console.log("options" + options);
 
@@ -87,12 +85,20 @@ socket.on("result_message", function (result_message) {
     }
   }
   //handleOptions(options)
-
 });
 
+socket.on("updatedQuestion", function (updatedQuestion) {
+  document.getElementById("questionInput").value =
+    updatedQuestion["updatedQuestion"];
+});
 
 const thisPath = window.location.pathname;
-const thisWorkplaceCode = thisPath.split("/").pop();
+var splitPath = thisPath.split("/");
+var thisWorkplaceCode = splitPath.pop();
+console.log(thisWorkplaceCode);
+while (thisWorkplaceCode.trim() == "") {
+  thisWorkplaceCode = splitPath.pop();
+}
 
 // Tyler
 // Sends JSON data to websocket
@@ -109,7 +115,7 @@ function sendMessage() {
       JSON.stringify({
         comment: comment,
         workplaceCode: thisWorkplaceCode,
-        authToken: getCookie("auth")
+        authToken: getCookie("auth"),
       })
     );
   }
@@ -234,14 +240,25 @@ function handleOptions(option) {
   console.log("total", totalVotes);
 }
 
+// Send updated question to websocket
+function sendQuestion() {
+  const updatedQuestion = document.getElementById("questionInput").value;
+  socket.send(
+    JSON.stringify({
+      updatedQuestion: updatedQuestion,
+      workplaceCode: thisWorkplaceCode,
+    })
+  );
+}
+
 // Create a new list item when clicking on the "Add" button
 function newElement() {
   const inputValue = document.getElementById("myInput").value;
   getColor();
-  color = getCookie("color")
-  if(color === "None") {
+  color = getCookie("color");
+  if (color === "None") {
     addColor();
-    color = getCookie("color")
+    color = getCookie("color");
   }
 
   if (inputValue === "") {
@@ -253,8 +270,8 @@ function newElement() {
   }
 
   // EJ
-  const question = document.getElementById("questionInput").value
-  const idea = document.getElementById("myInput").value
+  const question = document.getElementById("questionInput").value;
+  const idea = document.getElementById("myInput").value;
   console.log("question", question);
   console.log("idea", idea);
 
@@ -319,62 +336,78 @@ function newElement_create(inputValue, color) {
 }
 
 function userColor() {
-    hsl = "hsl(" + 360 * Math.random() + ',' +
-             (25 + 70 * Math.random()) + '%,' + 
-             (85 + 10 * Math.random()) + '%)'
-    hex = hslToHex(360 * Math.random(), 25 + 70 * Math.random(), 85 + 10 * Math.random())
-    return hex
+  hsl =
+    "hsl(" +
+    360 * Math.random() +
+    "," +
+    (25 + 70 * Math.random()) +
+    "%," +
+    (85 + 10 * Math.random()) +
+    "%)";
+  hex = hslToHex(
+    360 * Math.random(),
+    25 + 70 * Math.random(),
+    85 + 10 * Math.random()
+  );
+  return hex;
 }
 
 // Convert hsl to hex color
 //https://stackoverflow.com/a/44134328
 function hslToHex(h, s, l) {
   l /= 100;
-  const a = s * Math.min(l, 1 - l) / 100;
-  const f = n => {
+  const a = (s * Math.min(l, 1 - l)) / 100;
+  const f = (n) => {
     const k = (n + h / 30) % 12;
     const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
-    return Math.round(255 * color).toString(16).padStart(2, '0');   // convert to Hex and prefix "0" if needed
+    return Math.round(255 * color)
+      .toString(16)
+      .padStart(2, "0"); // convert to Hex and prefix "0" if needed
   };
   return `#${f(0)}${f(8)}${f(4)}`;
 }
 
 function addColor() {
   let xhr = new XMLHttpRequest();
-  paths = window.location.pathname.split("/")
-  code = paths[2]
+  paths = window.location.pathname.split("/");
+  code = paths[2];
 
-  xhr.open("POST", '/usercolor/'+code, false);
-  xhr.setRequestHeader('content-type', 'application/x-www-form-urlencoded;charset=UTF-8');
+  xhr.open("POST", "/usercolor/" + code, false);
+  xhr.setRequestHeader(
+    "content-type",
+    "application/x-www-form-urlencoded;charset=UTF-8"
+  );
   xhr.onload = function () {
-
     // Process our return data
     if (xhr.status >= 200 && xhr.status < 300) {
       // Runs when the request is successful
-      document.cookie = "color="+xhr.responseText;
+      document.cookie = "color=" + xhr.responseText;
     } else {
       // Runs when it's not
       document.cookie = "color=None";
     }
-  }
+  };
   xhr.send("color=" + userColor());
 }
 
 function getColor() {
   let xhr = new XMLHttpRequest();
-  paths = window.location.pathname.split("/")
-  code = paths[2]
-  xhr.open("GET", '/usercolor/'+code, false);
+  paths = window.location.pathname.split("/");
+  code = paths[2];
+  xhr.open("GET", "/usercolor/" + code, false);
   xhr.onload = function () {
-
     // Process our return data
     if (xhr.status >= 200 && xhr.status < 300) {
       // Runs when the request is successful
-      document.cookie = "color="+xhr.responseText;
+      document.cookie = "color=" + xhr.responseText;
     } else {
       // Runs when it's not
       document.cookie = "color=None";
     }
-  }
+  };
   xhr.send();
+}
+
+function enterProfile(user) {
+  window.location.replace("/user/" + user + "/");
 }
