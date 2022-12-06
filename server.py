@@ -485,6 +485,13 @@ def initialSend(data):
         join_room(room)
         broadcastNewMessage([makeMessage("SERVER", f"{username} entered the room.", room)], code=room)
 
+        wp = workplaces.find_one({"code":room})
+        question = wp["currentQuestion"]
+        timestamp = wp["questionExpiry"]
+
+
+        socketio.emit('dataDebrief', {'question':question,'timestamp':timestamp,'answers':"none"})
+
 
 @socketio.on('message')
 def handle_unnamed_message(message):
@@ -500,31 +507,39 @@ def handle_unnamed_message(message):
 
         poll_message = {"question_input": question_input, "idea_input": idea_input, "workplace_code_1": workplace_code, "color": user_color}
         new_message_list = [poll_message]
-        
+        print("poll_message:", poll_message)
         socketio.emit('poll_message', {'poll_message': poll_message}, to=workplace_code)
 
-    elif "options_server" and "totalVotes_server" in message:
+    elif "options_server" and "totalVotes_server" in escaped_message:
 
         poll_result = verify.process.process_result(escaped_message)
 
         result_message = {"options_server": poll_result[0], "total_votes_server": poll_result[1], "workplace_code_1": poll_result[2]}
+        print("result:", result_message)
         socketio.emit('result_message', {'result_message': result_message}, to=poll_result[2])
 
         # print("options_server", options_server)
         # print("totalVotes_server", total_votes_server)
         # print("workplace_code", workplace_code)
 
-    elif "updatedQuestion" in message:
+    elif "updatedQuestion" in escaped_message:
         jsonformat = json.loads(escaped_message)
 
         print(jsonformat)
-
+        workplaceCode = jsonformat["workplaceCode"]
         allegedAuth = request.cookies.get("auth")
         if AuthToken.validAuthToken(allegedAuth):
             user = AuthToken.getUsernameFromAuthToken(allegedAuth)
-            workplace = workplaces.find_one({"code":jsonformat["workplaceCode"]})
+            
+            workplace = workplaces.find_one({"code":workplaceCode})
             if user == workplace["userID"]:
-                socketio.emit('updatedQuestion', {'updatedQuestion': jsonformat["updatedQuestion"]}, to=jsonformat["workplaceCode"])
+                questionExpiry = jsonformat["questionExpirySeconds"]
+                timestamp = datetime.datetime.now() + datetime.timedelta(seconds=float(questionExpiry))
+                
+                question = jsonformat["updatedQuestion"]
+
+                workplaces.update_one({"code": workplaceCode},{"$set":{"currentQuestion":question, "questionExpiry":str(timestamp)}})
+                socketio.emit('updatedQuestion', {'updatedQuestion': question, "timestamp":str(timestamp)}, to=workplaceCode)
             else:
                 print(f"A user by the name of {user} just tried to make an unauthenticated questionChange!!")
     else:
