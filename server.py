@@ -508,12 +508,22 @@ def handle_unnamed_message(message):
     print(f"handle_message: {str(message)}")
     escaped_message = escape(message)
     if "question_input" and "idea_input" in message:
+
+        allegedAuth = request.cookies.get("auth")
+
         question_input = escaped_message.split(",")[0][19:-1]
         idea_input = escaped_message.split(",")[1][14:-1]
         workplace_code = escaped_message.split(",")[2][17:-1]
-        print(workplace_code)
-        print(escaped_message.split(",")[3][9:-2])
+        # print(workplace_code)
+        # print(escaped_message.split(",")[3][9:-2])
         user_color = escaped_message.split(",")[3][9:-2]
+
+        if AuthToken.validAuthToken(allegedAuth):
+            user = AuthToken.getUsernameFromAuthToken(allegedAuth)
+            initial_answer = {"Submitted by": user, "Answer": idea_input, "Vote": str(0), "workplace_code": workplace_code}
+            print("initial_answer is ", initial_answer)
+            answerVotes.insert_one(initial_answer)
+
 
         wp = workplaces.find_one({"code":workplace_code})
         threshold = dateutil.parser.parse(wp["questionExpiry"])
@@ -544,6 +554,22 @@ def handle_unnamed_message(message):
 
         result_message = {"options_server": poll_result[0], "total_votes_server": poll_result[1], "workplace_code_1": poll_result[2]}
         print("result:", result_message)
+
+
+        for x, y in poll_result[0].items():
+            answer = {"Answer": x}
+            db_find = answerVotes.find_one(answer, {'_id': False})
+            if db_find is None:
+                print("Something wrong")
+            else:
+                new_content = {"Vote": y}
+                # print("new_content", new_content)
+                answerVotes.update_one(answer, {'$set': new_content})
+
+        allUserDatabase = list(answerVotes.find({}, {'_id': False}))
+        print("allUserDatabase", allUserDatabase)
+
+
         socketio.emit('result_message', {'result_message': result_message}, to=poll_result[2])
 
         # print("options_server", options_server)
