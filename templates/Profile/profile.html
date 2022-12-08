@@ -6,33 +6,41 @@
   <link rel="stylesheet" href="/styles/profile" />
   <div class="profile">
     <!-- <h3 class="username">{{username}}</h3> -->
-    <form 
-    action="/changename"
-        method="post"
-        enctype="multipart/form-data"
-      >
-    <input
-      class="changeusername"
-      id="form-username"
-      type="text"
-      name="username"
-      placeholder="{{username}}"
-    />
-    <input class="saveButton" type="{{type}}" value="Save"/>
+
+    <form
+      class="pusername"
+      action="/changename"
+      method="post"
+      enctype="multipart/form-data"
+    >
+      <h4 class="titletext" style="margin: 0">Username:</h4>
+      <input
+        class="changeusername"
+        id="form-username"
+        type="text"
+        name="username"
+        placeholder="{{username}}"
+      />
+      <input class="saveButton" type="{{type}}" value="Save" />
     </form>
     <div class="split-screen">
       <div class="pleft">
         <div class="pcard">
           <h3 class="titletext">The workplaces I created</h3>
           <p class="smalltext">{{listNameCreate}}</p>
-        </div>
-      </div>
-      <div class="pright">
-        <div class="pcard">
           <h3 class="titletext">The workplaces I joined</h3>
+          <p>
+            View your grade: your grade is based on how many people vote for
+            your ideas
+          </p>
           <p class="smalltext">{{ListNameJoin}}</p>
         </div>
       </div>
+      <!-- <div class="pright">
+        <div class="pcard">
+          
+        </div>
+      </div> -->
     </div>
   </div>
 </body>

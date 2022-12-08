@@ -4,7 +4,15 @@ body {
 }
 .profile {
   background-color: #f4f7f6;
-  height: 100vh;
+  /* height: 100vh; */
+  /* justify-content: center;
+  align-items: center; */
+}
+.pusername {
+  display: flex;
+  justify-content: center;
+  padding-top: 50px;
+  padding-bottom: 50px;
 }
 .username {
   padding: 9%;
@@ -17,13 +25,12 @@ body {
 .split-screen {
   display: flex;
   flex-direction: column;
-  /*justify-content: space-around;*/
+  justify-content: space-around;
   row-gap: 30px;
 }
 
-.pleft,
-.pright {
-  display: flex;
+.pleft {
+  /* display: flex; */
   justify-content: center;
   align-items: center;
 }
@@ -52,9 +59,9 @@ body {
   outline: 0;
   color: #3a3b3c;
   background-color: #f4f7f6;
-  padding-left: 110px;
-  padding-top: 100px;
-  padding-bottom: 100px;
+  /* /* padding-left: 110px; */
+  /* padding-top: 100px;
+  padding-bottom: 100px; */
 }
 ::placeholder {
   /* Chrome, Firefox, Opera, Safari 10.1+ */

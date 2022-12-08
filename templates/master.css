@@ -49,6 +49,8 @@ p {
   } */
 
 .workspaceListCell {
+  display: flex;
+  justify-content: space-between;
   background: rgb(236, 190, 250);
   width: 50vw;
   margin: 5px;
