@@ -443,7 +443,9 @@ def showProfile(username):
             name2: str = workplace['workplace']
             code2: str = workplace['code']
             owner: str = workplace['userID']
-            users = workplace['users']
+            users = workplace.get('users')
+            if users == None:
+                return replacePlaceholder(withType, placeholder="listNameCreate",newContent=response)
             for user in users:
                 if user == username and user != owner:
                     withName2 = replacePlaceholder(htmlElements.profileListedWorkspace, placeholder="workspaceName", newContent=name2)
