@@ -395,7 +395,7 @@ def scriptRetrieval(scriptname):
             content = open('./templates/JoinCreate/joincreate.js','rb').read()
         case "chat":
             content = open('./templates/Workplace/chat.js','rb').read()
-    return content, 200, {'Content-Type':'text/js'}
+    return content, 200, {'Content-Type':'text/javascript'}
 
 @app.route("/myprofile", methods=['GET'])
 def goToMyProfile():
