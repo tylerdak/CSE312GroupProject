@@ -1,6 +1,9 @@
 # CSE312GroupProject
 
 # DOMAIN: [vote.dakin.one](http://vote.dakin.one)
+## Suggested Password
+Since there are some password requirements for our site... We recommend you use this password or something similar:
+ThisIsMyPassw0rd!
 
 ## Important Links
 | Label | Link |

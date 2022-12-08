@@ -7,7 +7,7 @@ class validate:
     def verify_password(password: str):
         l, u, n, s = 0, 0, 0, 0
         # lower, upper, number, and special character
-        special_characters = """`~!@#$%^*()_-+|\:;"',.?"""
+        special_characters = """`~!@#$%^*&()_-+|\:;"',.?"""
         # All special characters except <, >, /, and & to prevent HTML injection
         # Update: I also removed [ ], { }, and =. -Tyler
 

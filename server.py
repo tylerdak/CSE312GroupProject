@@ -465,6 +465,7 @@ def showProfile(username):
         else:
             showVotes = replacePlaceholder(withCode, placeholder="hidden", newContent="display:none")
             withVotes = replacePlaceholder(showVotes, placeholder="workspaceVotes", newContent="0")
+            withVotes = replacePlaceholder(withVotes, placeholder="usersAndVotes", newContent="")
         response += withVotes
 
     allWorkplaces = workplaces.find()

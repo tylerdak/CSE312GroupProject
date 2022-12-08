@@ -32,7 +32,8 @@ function addMessagesToChat(messages) {
 }
 
 // Establish a WebSocket connection with the server
-var socket = io("http://" + window.location.host); // new WebSocket("ws://" + window.location.host + "/websocket");
+var socket = io("http://" + window.location.host, { transports: ["websocket"] }); // new WebSocket("ws://" + window.location.host + "/websocket");
+// const socket = io("https://example.com", { transports: ["websocket"] });
 
 socket.on("connect", function () {
   socket.emit("initialDataRequest", {
