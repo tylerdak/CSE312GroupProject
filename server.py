@@ -20,6 +20,9 @@ from Private import flask_secret_key
 from cryptStuff import PassMan, AuthTokenPair, AuthToken
 import json
 import htmlElements
+
+from threading import Timer
+
 # from numpy import place
 # import pymongo
 
@@ -54,6 +57,10 @@ def incrementPageViewCount():
     stats.update_one({"label": "viewCount"}, {"$set": {"value": counter + 1}})
     return counter + 1
 
+
+# poor design to use a dict in the global like this, likely
+# however, timers *might* only be active when 
+timers: dict[str:Timer] = {}
 
 
 
@@ -141,7 +148,7 @@ def open_workplace(code):
         for i in range(len(wpUsers)):
             wpUsersArray += "\""+ wpUsers[i]+"\", "
             #Temporary implementation: str(0) must be changed to total votes once implemented
-            wpUsersVote += "\""+ str(0)+"\", "
+            wpUsersVote += "\""+"\", "
 
         wpUsersArray = wpUsersArray[:-2]
         wpUsersVote = wpUsersVote[:-2]
@@ -155,6 +162,7 @@ def open_workplace(code):
     withCode = replacePlaceholder(withName, placeholder="code", newContent=code)
     withUsers = replacePlaceholder(withCode, placeholder="users", newContent=usersArray)
     withMessages = replacePlaceholder(withUsers, placeholder="messages", newContent=messagesArray)
+    print(wpUsersVote, wpUsersArray)
     withVotes = replacePlaceholder(withMessages, placeholder="totalvotes", newContent=wpUsersVote)
     withWpUsers = replacePlaceholder(withVotes, placeholder="workplaceusers", newContent=wpUsersArray)
 
@@ -547,7 +555,36 @@ def initialSend(data):
             question = "Waiting for question..."
 
         socketio.emit('dataDebrief', {'question':question,'timestamp':timestamp,'answers':"none"})
+        # sendUpdatedUserTotalPoints(room, target=request.sid)
 
+# OUCH
+# def sendUpdatedUserTotalPoints(workspace_code: str, target: str = None):
+#     if target is None:
+#         target = workspace_code
+#     wp = workplaces.find_one({"code":workspace_code})
+#     wpUsers = wp.get("users")
+#     toSend = {}
+#     if wpUsers is not None and len(wpUsers) > 0:
+#         toSend["code"] = workspace_code
+#         users: dict[str:int] = {}
+#         for user in wpUsers:
+#             print("at least one user")
+#             userVotes = userTotalVotes.find_one({"User":user, "workplace_code":workspace_code})
+#             voteCount = userVotes.get("total_vote")
+#             if user is not None and voteCount is not None:
+#                 if users.get(userAct) is not None:
+#                     print(f"WARNING: User {userAct} found twice in one workplace... something's likely going wrong. However, we will handle getting their votes displayed correctly.")
+#                     users[userAct] = users[userAct] + voteCount
+#                 else:
+#                     print("setting vote count")
+#                     users[userAct] = voteCount
+#             else:
+#                 print("something was none")
+#         toSend["users"] = users
+#         print(toSend)
+#         socketio.emit('allUsers', toSend, to=target)
+    # else:
+    #     print("nope:", len(list(wps)), wps)
 
 @socketio.on('message')
 def handle_unnamed_message(message):
@@ -665,11 +702,19 @@ def handle_unnamed_message(message):
         # print("totalVotes_server", total_votes_server)
         # print("workplace_code", workplace_code)
     elif "allUsers" in escaped_message:
-        allUsers = verify.process.process_users(escaped_message)[0]
-        workspace_code = verify.process.process_users(escaped_message)[1]
-        allVotes = verify.process.process_users(escaped_message)[2]
-        result_message = {"allUsers": allUsers, "allVotes": allVotes}
-        socketio.emit('allUsers', result_message, to=workspace_code)
+        pass
+        # allUsers = verify.process.process_users(escaped_message)[0]
+        # workspace_code = verify.process.process_users(escaped_message)[1]
+        # allVotes = verify.process.process_users(escaped_message)[2]
+
+        # print(workspace_code)
+        # print(workspace_code)
+        # print(workspace_code)
+        # print(workspace_code)
+        # print(workspace_code)
+        # print(workspace_code)
+        
+        # sendUpdatedUserTotalPoints(workspace_code)
 
 
     elif "updatedQuestion" in escaped_message:
@@ -689,7 +734,7 @@ def handle_unnamed_message(message):
                     if floatSec is None:
                         return
                     timestamp = datetime.datetime.now() + datetime.timedelta(seconds=floatSec+1.0) # add 1.0 to account for processing delay
-                    
+                    timestamp = timestamp.astimezone()
                     question = jsonformat["updatedQuestion"]
 
                     workplaces.update_one({"code": workplaceCode},{"$set":{"currentQuestion":question, "questionExpiry":str(timestamp)}})
@@ -718,6 +763,38 @@ def broadcastNewMessage(messages: list[dict], code: str):
     sendableMessages = map(lambda x: (json.loads(x)), messages)
     socketio.emit('newMessage', {'messages': messages}, to=code)
 
+def timerEvent(code: str):
+    pass
+    # wp = workplaces.find_one({"code":code})
+    # if wp is None:
+    #     print(f"ERROR: Could not find any workplace with code {code}. Thus, not running timer event.")
+    # else:
+    #     answers = answerVotes.find({"workplace_code":code})
+    #     for answer in answers:
+    #         user, voteCount = answer.get("Submitted by"), answer.get("Vote")
+    #         if user is None or voteCount is None or int(voteCount) <= 0:
+    #             # don't worry about this answer if:
+    #                 # there's no user
+    #                 # there's no voteCount
+    #                 # the voteCount is negative or zero
+    #             continue
+    #         else:
+    #             voteCount = int(voteCount)
+
+    pass
+
+def startTimer(code: str, timestamp: datetime.datetime):
+    presentTimer: Timer | None = timers.get(code)
+    if presentTimer is not None:
+        presentTimer: Timer = presentTimer
+        presentTimer.cancel()
+    
+    print(code, timestamp)
+    # here's where I learned how to use timers:
+    # https://stackoverflow.com/a/11524152/10304846
+    delay = (timestamp - datetime.datetime.now()).total_seconds()
+    Timer(delay, timerEvent, [code]).start()
+
 # moved to styleRetrieval method for coherency's sake
 # @app.route("/profile.css", methods=['GET'])
 # def profileCSS():
@@ -729,4 +806,17 @@ if __name__ == "__main__":
     countValue = {"value": 0}
     stats.update_one(countStat, {"$setOnInsert": countValue}, upsert=True)
 
+    workplacesResultsInMainSpecifically = workplaces.find({})
+    for wp in workplacesResultsInMainSpecifically:
+        timestamp = wp.get("questionExpiry")
+        if timestamp is not None:
+            date = dateutil.parser.parse(timestamp)
+            if date > datetime.datetime.now():
+                startTimer(wp.get("code"),date)
+            else:
+                print(f"Workspace {wp.get('code')} does not have a future timestamp.")
+
     socketio.run(app,host="0.0.0.0", port=8081, debug=True)
+
+    
+

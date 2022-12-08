@@ -58,16 +58,23 @@ socket.on("poll_message", function (poll_message) {
 });
 
 socket.on("allUsers", function (allUsers) {
-  var workplaceusers = allUsers["allUsers"];
-  var totalvotes = allUsers["allVotes"];
-  console.log("workplaceusers" + workplaceusers);
-    let text2 = "";
-    for (let i = 0; i < workplaceusers.length - 1; i++) {
-      console.log(workplaceusers[i])
-      console.log(totalvotes[i])
-      text2 += "<span onclick=\"enterProfile('"+workplaceusers[i]+"')\" style=\"cursor: pointer;\">"+workplaceusers[i]+"</span><b><span style=\"color:black\">       "+totalvotes[i]+"</span></b><br>"
+  /* Format:
+  {
+    "code": <workplace_code>,
+    "users":
+    {
+      <username>:<points>
     }
-    document.getElementById("workplaceUsers").innerHTML = text2;
+  }
+  */
+  var workplaceusers = allUsers["users"];
+  console.log(workplaceusers)
+  let text2 = "";
+  for (const username of Object.keys(workplaceusers)) {
+    const voteCount = workplaceusers[username]
+    text2 += "<span onclick=\"enterProfile('"+username+"')\" style=\"cursor: pointer;\">"+username+"</span><b><span style=\"color:black\">       "+voteCount+"</span></b><br>"
+  }
+  document.getElementById("workplaceUsers").innerHTML = text2;
 });
 
 
