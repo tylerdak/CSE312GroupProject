@@ -603,7 +603,7 @@ def handle_unnamed_message(message):
         else:
             # if no questionExpiry available, just use the oldest timestamp available or whatever
             threshold = datetime.datetime.fromtimestamp(0.0)
-        actual = datetime.datetime.now()
+        actual = datetime.datetime.now().astimezone()
         if actual > threshold:
             print("regect answer for lateness")
             return
@@ -639,7 +639,7 @@ def handle_unnamed_message(message):
         else:
             # if no questionExpiry available, just use the oldest timestamp available or whatever
             threshold = datetime.datetime.fromtimestamp(0.0)
-        actual = datetime.datetime.now()
+        actual = datetime.datetime.now().astimezone()
         if actual > threshold:
             print("regect answer for lateness")
             return
@@ -794,7 +794,7 @@ if __name__ == "__main__":
         timestamp = wp.get("questionExpiry")
         if timestamp is not None:
             date = dateutil.parser.parse(timestamp)
-            if date > datetime.datetime.now():
+            if date > datetime.datetime.now().astimezone():
                 startTimer(wp.get("code"),date)
             else:
                 print(f"Workspace {wp.get('code')} does not have a future timestamp.")
