@@ -59,11 +59,13 @@ socket.on("poll_message", function (poll_message) {
 
 socket.on("allUsers", function (allUsers) {
   var workplaceusers = allUsers["allUsers"];
+  var totalvotes = allUsers["allVotes"];
   console.log("workplaceusers" + workplaceusers);
-
     let text2 = "";
     for (let i = 0; i < workplaceusers.length - 1; i++) {
-      text2 += "<span onclick=\"enterProfile('"+workplaceusers[i]+"')\" style=\"cursor: pointer;\">"+workplaceusers[i]+"</span><br>"
+      console.log(workplaceusers[i])
+      console.log(totalvotes[i])
+      text2 += "<span onclick=\"enterProfile('"+workplaceusers[i]+"')\" style=\"cursor: pointer;\">"+workplaceusers[i]+"</span><b><span style=\"color:black\">       "+totalvotes[i]+"</span></b><br>"
     }
     document.getElementById("workplaceUsers").innerHTML = text2;
 });

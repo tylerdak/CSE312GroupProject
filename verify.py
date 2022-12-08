@@ -66,14 +66,18 @@ class process:
     def process_users(input:str):
         delimiter_1 = '"allUsers":'
         delimiter_2 = ',"workplaceCode":"'
+        delimiter_3 = '","allVotes":'
 
         data_index_1 = input.find(delimiter_1)
         data_index_2 = input.find(delimiter_2)
+        data_index_3 = input.find(delimiter_3)
 
         users_pre = input[data_index_1 + len(delimiter_1):data_index_2]
         users = ast.literal_eval(users_pre)
-        workspace_code = input[data_index_2 + len(delimiter_2):-2]
-        return [users, workspace_code]
+        workspace_code = input[data_index_2 + len(delimiter_2):data_index_3]
+        users_votes = input[data_index_3 + len(delimiter_3):-1]
+        votes = ast.literal_eval(users_votes)
+        return [users, workspace_code, votes]
 
 
 

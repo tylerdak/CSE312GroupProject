@@ -27,6 +27,7 @@
         <script>
           var socket = io();
             const workplaceusers = {{workplaceusers}};
+            const totalvotes = {{totalvotes}};
 
             var workspaceCode = workplaceusers[workplaceusers.length - 1]
             console.log("workspaceCode " + workspaceCode)
@@ -34,14 +35,15 @@
             socket.send(
               JSON.stringify({
                 allUsers: workplaceusers,
-                workplaceCode: workspaceCode
+                workplaceCode: workspaceCode,
+                allVotes: totalvotes
               })
             );
 
             // For the user who joins the room
             let text2 = "";
             for (let i = 0; i < workplaceusers.length - 1; i++) {
-              text2 += "<span onclick=\"enterProfile('"+workplaceusers[i]+"')\" style=\"cursor: pointer;\">"+workplaceusers[i]+"</span><br>"
+              text2 += "<span onclick=\"enterProfile('"+workplaceusers[i]+"')\" style=\"cursor: pointer;\">"+workplaceusers[i]+"</span><b><span style=\"color:black\">       "+totalvotes[i]+"</span></b><br>"
             }
             document.getElementById("workplaceUsers").innerHTML = text2;
 
