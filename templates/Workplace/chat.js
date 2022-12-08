@@ -32,7 +32,7 @@ function addMessagesToChat(messages) {
 }
 
 // Establish a WebSocket connection with the server
-var socket = io(); // new WebSocket("ws://" + window.location.host + "/websocket");
+var socket = io("http://vote.dakin.one"); // new WebSocket("ws://" + window.location.host + "/websocket");
 
 socket.on("connect", function () {
   socket.emit("initialDataRequest", {
