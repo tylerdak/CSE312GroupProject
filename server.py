@@ -583,12 +583,19 @@ def handle_unnamed_message(message):
         if AuthToken.validAuthToken(allegedAuth):
             user = AuthToken.getUsernameFromAuthToken(allegedAuth)
             initial_answer = {"Submitted by": user, "Answer": idea_input, "Vote": str(0), "workplace_code": workplace_code}
-            print("initial_answer is ", initial_answer)
             answerVotes.insert_one(initial_answer)
+
+            initial_total_votes = {"User": user, "total_vote": str(0), "workplace_code": workplace_code}
+            total_Vote_db = userTotalVotes.find_one({"User": user})
+
+            if total_Vote_db is None:
+                userTotalVotes.insert_one(initial_total_votes)
+            else:
+                print("User's total vote is in the database already")
 
         poll_message = {"question_input": question_input, "idea_input": idea_input, "workplace_code_1": workplace_code, "color": user_color}
         new_message_list = [poll_message]
-        print("poll_message:", poll_message)
+        # print("poll_message:", poll_message)
         socketio.emit('poll_message', {'poll_message': poll_message}, to=workplace_code)
 
     elif "options_server" and "totalVotes_server" in escaped_message:
@@ -610,21 +617,45 @@ def handle_unnamed_message(message):
             print("allow") 
 
         result_message = {"options_server": poll_result[0], "total_votes_server": poll_result[1], "workplace_code_1": poll_result[2]}
-        print("result:", result_message)
+        # print("result:", result_message)
 
+
+        allegedAuth = request.cookies.get("auth")
+        user = AuthToken.getUsernameFromAuthToken(allegedAuth)
 
         for x, y in poll_result[0].items():
-            answer = {"Answer": x}
+            answer = {"Answer": x, "workplace_code": poll_result[2]}
             db_find = answerVotes.find_one(answer, {'_id': False})
             if db_find is None:
                 print("Something wrong")
             else:
-                new_content = {"Vote": y}
+                new_content = {"Answer": x, "Vote": y, "workplace_code": poll_result[2]}
                 # print("new_content", new_content)
                 answerVotes.update_one(answer, {'$set': new_content})
 
-        allUserDatabase = list(answerVotes.find({}, {'_id': False}))
-        print("allUserDatabase", allUserDatabase)
+        allUserDatabase = list(answerVotes.find({"workplace_code": poll_result[2]}, {'_id': False}))
+        # allUserDatabase_2 = list(answerVotes.find({}, {'_id': False}))
+
+        allTotalVoteDatabase = list(userTotalVotes.find({"workplace_code": poll_result[2]}, {'_id': False}))
+
+        for x in allTotalVoteDatabase:
+            username = x.get("User")
+            total_vote = 0
+
+            for y in allUserDatabase:
+                if y.get("Submitted by") == username:
+                    vote = y.get("Vote")
+                    total_vote += int(vote)
+
+            old_content = {"User": username, "total_vote": x.get("total_vote"), "workplace_code": x.get("workplace_code")}
+            new_content = {"User": username, "total_vote": total_vote, "workplace_code": x.get("workplace_code")}
+
+            userTotalVotes.update_one(old_content, {'$set': new_content})
+
+        users_total_vote_test = list(userTotalVotes.find({"workplace_code": poll_result[2]}, {'_id': False}))
+        answerVotes_test = list(answerVotes.find({"workplace_code": poll_result[2]}, {'_id': False}))
+        print("users_total_vote_test", users_total_vote_test)
+        print("answerVotes_test", answerVotes_test)
 
 
         socketio.emit('result_message', {'result_message': result_message}, to=poll_result[2])
