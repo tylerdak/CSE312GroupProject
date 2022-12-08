@@ -67,12 +67,12 @@ socket.on("allUsers", function (allUsers) {
     }
   }
   */
-  var workplaceusers = allUsers["users"];
+  var workplaceusers = allUsers["allUsers"];
   console.log(workplaceusers)
   let text2 = "";
-  for (const username of Object.keys(workplaceusers)) {
-    const voteCount = workplaceusers[username]
-    text2 += "<span onclick=\"enterProfile('"+username+"')\" style=\"cursor: pointer;\">"+username+"</span><b><span style=\"color:black\">       "+voteCount+"</span></b><br>"
+  for (let i = 0; i < workplaceusers.length - 1; i++) {
+    console.log(workplaceusers[i])
+    text2 += "<span onclick=\"enterProfile('"+workplaceusers[i]+"')\" style=\"cursor: pointer;\">"+workplaceusers[i]+"</span><br>"
   }
   document.getElementById("workplaceUsers").innerHTML = text2;
 });

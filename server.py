@@ -139,32 +139,24 @@ def open_workplace(code):
 
     wpUsers = []
     usersGet = workplace.get("users")
-    ownerGet = workplace.get("userID")
     if usersGet != None:
         wpUsers = usersGet
     wpUsersArray = "["
-    wpUsersVote = "["
     if wpUsers != []:
         for i in range(len(wpUsers)):
             wpUsersArray += "\""+ wpUsers[i]+"\", "
-            #Temporary implementation: str(0) must be changed to total votes once implemented
-            wpUsersVote += "\""+"\", "
 
         wpUsersArray = wpUsersArray[:-2]
-        wpUsersVote = wpUsersVote[:-2]
 
         wpUsersArray += ", \"" + code +"\""
     wpUsersArray += "]"
-    wpUsersVote += "]"
 
     outerInjected = Templating.injectHTMLBody(srcFile="./templates/Workplace/workplace.html")
     withName = replacePlaceholder(outerInjected, placeholder="name", newContent=workplace.get("workplace"))
     withCode = replacePlaceholder(withName, placeholder="code", newContent=code)
     withUsers = replacePlaceholder(withCode, placeholder="users", newContent=usersArray)
     withMessages = replacePlaceholder(withUsers, placeholder="messages", newContent=messagesArray)
-    print(wpUsersVote, wpUsersArray)
-    withVotes = replacePlaceholder(withMessages, placeholder="totalvotes", newContent=wpUsersVote)
-    withWpUsers = replacePlaceholder(withVotes, placeholder="workplaceusers", newContent=wpUsersArray)
+    withWpUsers = replacePlaceholder(withMessages, placeholder="workplaceusers", newContent=wpUsersArray)
 
     withSendQuestionInput = None
     withSendQuestionButton = None
@@ -611,7 +603,7 @@ def handle_unnamed_message(message):
         else:
             # if no questionExpiry available, just use the oldest timestamp available or whatever
             threshold = datetime.datetime.fromtimestamp(0.0)
-        actual = datetime.datetime.now().astimezone()
+        actual = datetime.datetime.now()
         if actual > threshold:
             print("regect answer for lateness")
             return
@@ -647,7 +639,7 @@ def handle_unnamed_message(message):
         else:
             # if no questionExpiry available, just use the oldest timestamp available or whatever
             threshold = datetime.datetime.fromtimestamp(0.0)
-        actual = datetime.datetime.now().astimezone()
+        actual = datetime.datetime.now()
         if actual > threshold:
             print("regect answer for lateness")
             return
@@ -702,19 +694,10 @@ def handle_unnamed_message(message):
         # print("totalVotes_server", total_votes_server)
         # print("workplace_code", workplace_code)
     elif "allUsers" in escaped_message:
-        pass
-        # allUsers = verify.process.process_users(escaped_message)[0]
-        # workspace_code = verify.process.process_users(escaped_message)[1]
-        # allVotes = verify.process.process_users(escaped_message)[2]
-
-        # print(workspace_code)
-        # print(workspace_code)
-        # print(workspace_code)
-        # print(workspace_code)
-        # print(workspace_code)
-        # print(workspace_code)
-        
-        # sendUpdatedUserTotalPoints(workspace_code)
+        allUsers = verify.process.process_users(escaped_message)[0]
+        workspace_code = verify.process.process_users(escaped_message)[1]
+        result_message = {"allUsers": allUsers}
+        socketio.emit('allUsers', result_message, to=workspace_code)
 
 
     elif "updatedQuestion" in escaped_message:
@@ -811,7 +794,7 @@ if __name__ == "__main__":
         timestamp = wp.get("questionExpiry")
         if timestamp is not None:
             date = dateutil.parser.parse(timestamp)
-            if date > datetime.datetime.now().astimezone():
+            if date > datetime.datetime.now():
                 startTimer(wp.get("code"),date)
             else:
                 print(f"Workspace {wp.get('code')} does not have a future timestamp.")
