@@ -122,6 +122,10 @@ function timer() {
   
   var minutes = Math.floor(diff / (1000 * 60));
   var seconds = Math.floor(diff % (1000*60) / 1000);
+
+  if (seconds < 10) {
+    seconds = "0" + String(seconds)
+  }
   
   document.getElementById("timerThing").innerHTML = minutes + ":" + seconds
   
@@ -319,6 +323,7 @@ function handleOptions(option) {
 function sendQuestion() {
   const updatedQuestion = document.getElementById("questionInput").value;
   var questionExpirySeconds = document.getElementById("questionExpiryInput").value;
+  document.getElementById("questionExpiryInput").value = "";
   if (questionExpirySeconds.trim() == "") {
     questionExpirySeconds = "60";
   }

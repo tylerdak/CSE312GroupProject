@@ -651,12 +651,21 @@ def handle_unnamed_message(message):
             workplace = workplaces.find_one({"code":workplaceCode})
             if user == workplace["userID"]:
                 questionExpiry = jsonformat["questionExpirySeconds"]
-                timestamp = datetime.datetime.now() + datetime.timedelta(seconds=float(questionExpiry))
-                
-                question = jsonformat["updatedQuestion"]
+                try:
+                    floatSec = float(questionExpiry)
+                    if floatSec is None:
+                        return
+                    timestamp = datetime.datetime.now() + datetime.timedelta(seconds=floatSec+1.0) # add 1.0 to account for processing delay
+                    
+                    question = jsonformat["updatedQuestion"]
 
-                workplaces.update_one({"code": workplaceCode},{"$set":{"currentQuestion":question, "questionExpiry":str(timestamp)}})
-                socketio.emit('updatedQuestion', {'updatedQuestion': question, "timestamp":str(timestamp)}, to=workplaceCode)
+                    workplaces.update_one({"code": workplaceCode},{"$set":{"currentQuestion":question, "questionExpiry":str(timestamp)}})
+                    socketio.emit('updatedQuestion', {'updatedQuestion': question, "timestamp":str(timestamp)}, to=workplaceCode)
+                except TypeError:
+                    print("invalid time input")
+                except ValueError:
+                    print("invalid time input")
+
             else:
                 print(f"A user by the name of {user} just tried to make an unauthenticated questionChange!!")
     else:
