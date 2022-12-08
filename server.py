@@ -171,6 +171,7 @@ def open_workplace(code):
         withSendQuestionInput = replacePlaceholder(withWpUsers, placeholder="sendQuestionInput", newContent='<input type="text" id="questionInput" placeholder="Waiting for question" disabled/>')
         withSendQuestionButton = replacePlaceholder(withSendQuestionInput, placeholder="sendQuestion", newContent='<span class="expiredTimer" id="timerThing">EXPIRED</span>')
         # empty content
+        withSendQuestionButton = replacePlaceholder(withSendQuestionButton, placeholder="questionExpiryInput", newContent='')
         withSendQuestionButton = replacePlaceholder(withSendQuestionButton, placeholder="timer", newContent='')
 
     print("RQUEST.cookies", request.cookies)
