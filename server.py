@@ -165,9 +165,13 @@ def open_workplace(code):
     if username == workplace["userID"]:
         withSendQuestionInput = replacePlaceholder(withWpUsers, placeholder="sendQuestionInput", newContent='<input type="text" id="questionInput" placeholder="Type question here..." />')
         withSendQuestionButton = replacePlaceholder(withSendQuestionInput, placeholder="sendQuestion", newContent='<span onclick="sendQuestion();" class="addBtn">Submit</span>')
+        withSendQuestionButton = replacePlaceholder(withSendQuestionButton, placeholder="questionExpiryInput", newContent='<input type="text" id="questionExpiryInput" placeholder="Amount of time for question in seconds (default: 60s)" />')
+        withSendQuestionButton = replacePlaceholder(withSendQuestionButton, placeholder="timer", newContent='<span class="expiredTimer" id="timerThing">EXPIRED</span>')
     else:
         withSendQuestionInput = replacePlaceholder(withWpUsers, placeholder="sendQuestionInput", newContent='<input type="text" id="questionInput" placeholder="Waiting for question" disabled/>')
         withSendQuestionButton = replacePlaceholder(withSendQuestionInput, placeholder="sendQuestion", newContent='<span class="expiredTimer" id="timerThing">EXPIRED</span>')
+        # empty content
+        withSendQuestionButton = replacePlaceholder(withSendQuestionButton, placeholder="timer", newContent='')
 
     print("RQUEST.cookies", request.cookies)
 
@@ -558,21 +562,28 @@ def handle_unnamed_message(message):
         # print(escaped_message.split(",")[3][9:-2])
         user_color = escaped_message.split(",")[3][9:-2]
 
-        if AuthToken.validAuthToken(allegedAuth):
-            user = AuthToken.getUsernameFromAuthToken(allegedAuth)
-            initial_answer = {"Submitted by": user, "Answer": idea_input, "Vote": str(0), "workplace_code": workplace_code}
-            print("initial_answer is ", initial_answer)
-            answerVotes.insert_one(initial_answer)
+        
 
 
         wp = workplaces.find_one({"code":workplace_code})
-        threshold = dateutil.parser.parse(wp["questionExpiry"])
+        questionExpiry = wp.get("questionExpiry")
+        if questionExpiry is not None:
+            threshold = dateutil.parser.parse(questionExpiry)
+        else:
+            # if no questionExpiry available, just use the oldest timestamp available or whatever
+            threshold = datetime.datetime.fromtimestamp(0.0)
         actual = datetime.datetime.now()
         if actual > threshold:
             print("regect answer for lateness")
             return
         else:
             print("allow") 
+
+        if AuthToken.validAuthToken(allegedAuth):
+            user = AuthToken.getUsernameFromAuthToken(allegedAuth)
+            initial_answer = {"Submitted by": user, "Answer": idea_input, "Vote": str(0), "workplace_code": workplace_code}
+            print("initial_answer is ", initial_answer)
+            answerVotes.insert_one(initial_answer)
 
         poll_message = {"question_input": question_input, "idea_input": idea_input, "workplace_code_1": workplace_code, "color": user_color}
         new_message_list = [poll_message]
@@ -584,10 +595,15 @@ def handle_unnamed_message(message):
         poll_result = verify.process.process_result(escaped_message)
 
         wp = workplaces.find_one({"code":poll_result[2]})
-        threshold = dateutil.parser.parse(wp["questionExpiry"])
+        questionExpiry = wp.get("questionExpiry")
+        if questionExpiry is not None:
+            threshold = dateutil.parser.parse(questionExpiry)
+        else:
+            # if no questionExpiry available, just use the oldest timestamp available or whatever
+            threshold = datetime.datetime.fromtimestamp(0.0)
         actual = datetime.datetime.now()
         if actual > threshold:
-            print("regect for lateness")
+            print("regect answer for lateness")
             return
         else:
             print("allow") 

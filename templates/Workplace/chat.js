@@ -318,11 +318,17 @@ function handleOptions(option) {
 // Send updated question to websocket
 function sendQuestion() {
   const updatedQuestion = document.getElementById("questionInput").value;
+  var questionExpirySeconds = document.getElementById("questionExpiryInput").value;
+  if (questionExpirySeconds.trim() == "") {
+    questionExpirySeconds = "60";
+  }
+
+  questionExpirySeconds = Number(questionExpirySeconds);
   socket.send(
     JSON.stringify({
       updatedQuestion: updatedQuestion,
       workplaceCode: thisWorkplaceCode,
-      questionExpirySeconds: 60.0
+      questionExpirySeconds: questionExpirySeconds
     })
   );
 }

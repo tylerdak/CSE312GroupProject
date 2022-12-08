@@ -330,3 +330,23 @@ li.selected {
   background-color: #00ff00;
   color: black;
 }
+
+#timerAmountLeadingLabel {
+  display: inline-block;
+  width: 150px; /* Adjust as needed */
+  text-align: right;
+}
+
+#timerAmountInput {
+  display: inline-block;
+  width: 150px; /* Adjust as needed */
+  margin-left: 10px; /* Adjust as needed */
+  float: right;
+}
+
+#timerAmountTrailingLabel {
+  display: inline-block;
+  width: 50px; /* Adjust as needed */
+  margin-left: 10px; /* Adjust as needed */
+  text-align: left;
+}
