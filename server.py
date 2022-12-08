@@ -427,12 +427,41 @@ def showProfile(username):
     for wp in listUserCreatedWorkspaces:
         name: str = wp['workplace']
         code: str = wp['code']
+        answers: list = list(answerVotes.find({"workplace_code": code}, {'_id': False}))
+        
         withName = replacePlaceholder(htmlElements.profileListedWorkspace, placeholder="workspaceName", newContent=name)
         withCode = replacePlaceholder(withName, placeholder="workspaceCode", newContent=code)
+        
+        htmlVotes = ""
         if username == testuser:
             showVotes = replacePlaceholder(withCode, placeholder="hidden", newContent="display:visible")
             #Temporary implementation: newContent="0" must be updated to actual vote amount when total vote is implemented
             withVotes = replacePlaceholder(showVotes, placeholder="workspaceVotes", newContent="0")
+
+            # {
+            #   username: {
+            #       answer1: 99,
+            #       answer2: 12,
+            #   }   
+            # }
+            usernameAnswerVotes = {}
+            for answer in answers:
+                if answer["Submitted by"] not in usernameAnswerVotes:
+                    usernameAnswerVotes[answer["Submitted by"]] = {}
+                
+                usernameAnswerVotes[answer["Submitted by"]][answer["Answer"]] = answer["Vote"]
+
+            for user in usernameAnswerVotes:
+                htmlVotes += '<p style="color: black">{}</p>'.format(user)
+                for answer, votes in usernameAnswerVotes[user].items():
+                    htmlVotes += '<div style="display: flex; justify-content: space-between">'
+                    htmlVotes += "<p>{}</p>".format(answer)
+                    htmlVotes += "<p>Votes: {}</p>".format(str(votes))
+                    htmlVotes += '</div>'
+                htmlVotes += "<br>"
+            htmlVotes = "<div>{}</div>".format(htmlVotes)
+
+            withVotes = replacePlaceholder(withVotes, placeholder="usersAndVotes", newContent=htmlVotes)
         else:
             showVotes = replacePlaceholder(withCode, placeholder="hidden", newContent="display:none")
             withVotes = replacePlaceholder(showVotes, placeholder="workspaceVotes", newContent="0")
@@ -449,8 +478,12 @@ def showProfile(username):
             code2: str = workplace['code']
             owner: str = workplace['userID']
             users = workplace.get('users')
+            answers = list(answerVotes.find({"workplace_code": code2}, {'_id': False}))
+            htmlVotes = ""
+
             if users == None:
-                return replacePlaceholder(withType, placeholder="listNameCreate",newContent=response)
+                # return replacePlaceholder(withType, placeholder="listNameCreate",newContent=response)
+                return replacePlaceholder(withType, placeholder="listNameCreate",newContent='')
             for user in users:
                 if user == username and user != owner:
                     withName2 = replacePlaceholder(htmlElements.profileListedWorkspace, placeholder="workspaceName", newContent=name2)
@@ -459,6 +492,31 @@ def showProfile(username):
                         showVotes2 = replacePlaceholder(withCode2, placeholder="hidden", newContent="display:visible")
                         #Temporary implementation: newContent="0" must be updated to actual vote amount when total vote is implemented
                         withVotes2 = replacePlaceholder(showVotes2, placeholder="workspaceVotes", newContent="0")
+
+                        usernameAnswerVotes = {}
+                        for answer in answers:
+                            if answer["Submitted by"] != username:
+                                continue
+                            if answer["Submitted by"] not in usernameAnswerVotes:
+                                usernameAnswerVotes[answer["Submitted by"]] = {}
+                            
+                            usernameAnswerVotes[answer["Submitted by"]][answer["Answer"]] = answer["Vote"]
+
+                        print("哈哈哈哈哈哈哈哈·")
+                        print(usernameAnswerVotes)
+                        print("哈哈哈哈哈哈哈哈·")
+
+                        for user in usernameAnswerVotes:
+                            htmlVotes += '<p style="color: black">{}</p>'.format(user)
+                            for answer, votes in usernameAnswerVotes[user].items():
+                                htmlVotes += '<div style="display: flex; justify-content: space-between">'
+                                htmlVotes += "<p>{}</p>".format(answer)
+                                htmlVotes += "<p>Votes: {}</p>".format(str(votes))
+                                htmlVotes += '</div>'
+                            htmlVotes += "<br>"
+                        htmlVotes = "<div>{}</div>".format(htmlVotes)
+
+                        withVotes2 = replacePlaceholder(withVotes2, placeholder="usersAndVotes", newContent=htmlVotes)
                     else:
                         showVotes2 = replacePlaceholder(withCode2, placeholder="hidden", newContent="display:none")
                         withVotes2 = replacePlaceholder(showVotes2, placeholder="workspaceVotes", newContent="0")
