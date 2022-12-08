@@ -107,15 +107,15 @@ clearInterval(x);
 function timer() {
   // today
   var nowDate = new Date()
-  nowDate = new Date(nowDate)
+  nowDate = new Date(nowDate.toUTCString())//.replace("GMT", ""))
   var now = nowDate.getTime();
   var soon = new Date(currentTimestamp).getTime()
-  console.log(currentTimestamp, nowDate.toUTCString())
+  console.log(currentTimestamp, nowDate)
   var timezone = nowDate.getTimezoneOffset()*60*1000
-  console.log(new Date(currentTimestamp + String(timezone) + ":00"), nowDate, timezone)
+  console.log(new Date(currentTimestamp), nowDate, timezone)
   console.log(soon, now)
 
-  var diff = soon - now - timezone;
+  var diff = soon - now //- timezone;
   console.log(diff)
   
   var minutes = Math.floor(diff / (1000 * 60));
