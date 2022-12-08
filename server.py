@@ -132,23 +132,31 @@ def open_workplace(code):
 
     wpUsers = []
     usersGet = workplace.get("users")
+    ownerGet = workplace.get("userID")
     if usersGet != None:
         wpUsers = usersGet
     wpUsersArray = "["
+    wpUsersVote = "["
     if wpUsers != []:
         for i in range(len(wpUsers)):
             wpUsersArray += "\""+ wpUsers[i]+"\", "
+            #Temporary implementation: str(0) must be changed to total votes once implemented
+            wpUsersVote += "\""+ str(0)+"\", "
+
         wpUsersArray = wpUsersArray[:-2]
+        wpUsersVote = wpUsersVote[:-2]
 
         wpUsersArray += ", \"" + code +"\""
     wpUsersArray += "]"
+    wpUsersVote += "]"
 
     outerInjected = Templating.injectHTMLBody(srcFile="./templates/Workplace/workplace.html")
     withName = replacePlaceholder(outerInjected, placeholder="name", newContent=workplace.get("workplace"))
     withCode = replacePlaceholder(withName, placeholder="code", newContent=code)
     withUsers = replacePlaceholder(withCode, placeholder="users", newContent=usersArray)
     withMessages = replacePlaceholder(withUsers, placeholder="messages", newContent=messagesArray)
-    withWpUsers = replacePlaceholder(withMessages, placeholder="workplaceusers", newContent=wpUsersArray)
+    withVotes = replacePlaceholder(withMessages, placeholder="totalvotes", newContent=wpUsersVote)
+    withWpUsers = replacePlaceholder(withVotes, placeholder="workplaceusers", newContent=wpUsersArray)
 
     withSendQuestionInput = None
     withSendQuestionButton = None
@@ -416,10 +424,40 @@ def showProfile(username):
         code: str = wp['code']
         withName = replacePlaceholder(htmlElements.profileListedWorkspace, placeholder="workspaceName", newContent=name)
         withCode = replacePlaceholder(withName, placeholder="workspaceCode", newContent=code)
-        response += withCode
+        if username == testuser:
+            showVotes = replacePlaceholder(withCode, placeholder="hidden", newContent="display:visible")
+            #Temporary implementation: newContent="0" must be updated to actual vote amount when total vote is implemented
+            withVotes = replacePlaceholder(showVotes, placeholder="workspaceVotes", newContent="0")
+        else:
+            showVotes = replacePlaceholder(withCode, placeholder="hidden", newContent="display:none")
+            withVotes = replacePlaceholder(showVotes, placeholder="workspaceVotes", newContent="0")
+        response += withVotes
 
+    allWorkplaces = workplaces.find()
+    response2 = ""
+    if allWorkplaces == None:
+        return replacePlaceholder(withType, placeholder="listNameCreate",newContent=response)
+    else:
+        withCreated = replacePlaceholder(withType, placeholder="listNameCreate",newContent=response)
+    for workplace in allWorkplaces:
+            name2: str = workplace['workplace']
+            code2: str = workplace['code']
+            owner: str = workplace['userID']
+            users = workplace['users']
+            for user in users:
+                if user == username and user != owner:
+                    withName2 = replacePlaceholder(htmlElements.profileListedWorkspace, placeholder="workspaceName", newContent=name2)
+                    withCode2 = replacePlaceholder(withName2, placeholder="workspaceCode", newContent=code2)
+                    if user == testuser or owner == testuser:
+                        showVotes2 = replacePlaceholder(withCode2, placeholder="hidden", newContent="display:visible")
+                        #Temporary implementation: newContent="0" must be updated to actual vote amount when total vote is implemented
+                        withVotes2 = replacePlaceholder(showVotes2, placeholder="workspaceVotes", newContent="0")
+                    else:
+                        showVotes2 = replacePlaceholder(withCode2, placeholder="hidden", newContent="display:none")
+                        withVotes2 = replacePlaceholder(showVotes2, placeholder="workspaceVotes", newContent="0")
+                    response2 += withVotes2
 
-    return replacePlaceholder(withType, placeholder="listNameCreate",newContent=response)
+    return replacePlaceholder(withCreated, placeholder="ListNameJoin",newContent=response2)
 
 @app.route("/changename/", methods=['POST'])
 def update_name():
@@ -578,7 +616,8 @@ def handle_unnamed_message(message):
     elif "allUsers" in escaped_message:
         allUsers = verify.process.process_users(escaped_message)[0]
         workspace_code = verify.process.process_users(escaped_message)[1]
-        result_message = {"allUsers": allUsers}
+        allVotes = verify.process.process_users(escaped_message)[2]
+        result_message = {"allUsers": allUsers, "allVotes": allVotes}
         socketio.emit('allUsers', result_message, to=workspace_code)
 
 
