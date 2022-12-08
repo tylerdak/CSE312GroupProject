@@ -1,4 +1,5 @@
 import ast
+from dbstuff import users
 
 
 class validate:
@@ -34,6 +35,9 @@ class validate:
             return False
 
     def verify_username(username: str):
+        match = users.find({"username":username})
+        if len(list(match)) > 0:
+            return False
         special_characters = "<>&/"
         if 2 <= len(username) < 21:
             for x in username:

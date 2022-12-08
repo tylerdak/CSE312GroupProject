@@ -473,8 +473,9 @@ def update_name():
         return redirect("/")
     userID = AuthToken.getUsernameFromAuthToken(authToken=authToken)
     newID = request.form['username']
+    newID = escape(newID).strip()
     validUsername = verify.validate.verify_username(newID)
-    newID = escape(newID)
+    
     
     if validUsername:
         authTokens.update_many({'owner': userID}, {'$set': {'owner': newID}})
