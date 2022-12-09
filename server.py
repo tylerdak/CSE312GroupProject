@@ -775,7 +775,7 @@ def handle_unnamed_message(message):
                     floatSec = float(questionExpiry)
                     if floatSec is None:
                         return
-                    timestamp = datetime.datetime.now() + datetime.timedelta(seconds=floatSec+1.0) # add 1.0 to account for processing delay
+                    timestamp = datetime.datetime.now() + datetime.timedelta(seconds=floatSec)
                     timestamp = timestamp.astimezone()
                     question = jsonformat["updatedQuestion"]
 
