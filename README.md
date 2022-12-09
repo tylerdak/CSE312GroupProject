@@ -1,6 +1,6 @@
 # CSE312GroupProject
 
-# DOMAIN: [vote.dakin.one](http://vote.dakin.one)
+# DOMAIN: [vote.dakin.one:8081 (RIP nginx 😔)](http://vote.dakin.one:8081)
 ## Suggested Password
 Since there are some password requirements for our site... We recommend you use this password or something similar:
 ThisIsMyPassw0rd!
